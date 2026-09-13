@@ -8,8 +8,10 @@ import {
 	SunIcon,
 	MoonIcon,
 	DesktopIcon,
+	CaretDownIcon,
 } from "@phosphor-icons/react";
-import type { ReactElement } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState, type ReactElement } from "react";
 import { useI18n } from "@/contexts/I18nContext";
 import { useScopedT } from "@/contexts/I18nContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -60,6 +62,7 @@ export function MorePopover({
 	const { locale, setLocale } = useI18n();
 	const { preference, setPreference } = useTheme();
 	const { isOpen, requestOpen, requestClose } = useLaunchPopoverCoordinator();
+	const [languagesExpanded, setLanguagesExpanded] = useState(false);
 	const open = isOpen(POPOVER_ID);
 
 	return (
@@ -68,6 +71,7 @@ export function MorePopover({
 			onOpenChange={(nextOpen) => {
 				if (!nextOpen) {
 					requestClose(POPOVER_ID);
+					setLanguagesExpanded(false);
 					return;
 				}
 				requestOpen(POPOVER_ID);
@@ -160,19 +164,47 @@ export function MorePopover({
 			<div className={styles.ddLabel} style={{ marginTop: 4 }}>
 				{t("recording.language")}
 			</div>
-			{SUPPORTED_LOCALES.map((code) => (
-				<DropdownItem
-					key={code}
-					icon={<TranslateIcon size={16} />}
-					selected={locale === code}
-					onClick={() => {
-						setLocale(code as AppLocale);
-						requestClose(POPOVER_ID);
-					}}
-				>
-					{LOCALE_LABELS[code] ?? code}
-				</DropdownItem>
-			))}
+			<DropdownItem
+				icon={<TranslateIcon size={16} />}
+				onClick={() => setLanguagesExpanded((prev) => !prev)}
+				selected={languagesExpanded}
+				trailing={
+					<CaretDownIcon
+						size={12}
+						weight="bold"
+						className={`transition-transform duration-200 text-[var(--launch-text-muted)] shrink-0 ${
+							languagesExpanded ? "rotate-180" : ""
+						}`}
+					/>
+				}
+			>
+				{LOCALE_LABELS[locale] ?? locale}
+			</DropdownItem>
+			<AnimatePresence initial={false}>
+				{languagesExpanded && (
+					<motion.div
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: "auto" }}
+						exit={{ opacity: 0, height: 0 }}
+						transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+						className="overflow-hidden flex flex-col gap-0.5 pl-3 border-l border-[var(--launch-border-strong)] ml-3.5 my-1"
+					>
+						{SUPPORTED_LOCALES.map((code) => (
+							<DropdownItem
+								key={code}
+								icon={<span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />}
+								selected={locale === code}
+								onClick={() => {
+									setLocale(code as AppLocale);
+									requestClose(POPOVER_ID);
+								}}
+							>
+								{LOCALE_LABELS[code] ?? code}
+							</DropdownItem>
+						))}
+					</motion.div>
+				)}
+			</AnimatePresence>
 			{appVersion && (
 				<div
 					style={{

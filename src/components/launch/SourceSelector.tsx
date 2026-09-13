@@ -326,7 +326,7 @@ export const SourceSelector = React.memo(function SourceSelector({
 				className="launch-theme w-80 p-0 source-selector-popover"
 				unstyled
 				align="start"
-				sideOffset={8}
+				sideOffset={14}
 				side="top"
 				alignOffset={-8}
 				avoidCollisions={true}

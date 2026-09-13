@@ -55,8 +55,8 @@ export default function App() {
 	useEffect(() => {
 		document.title =
 			windowType === "editor"
-				? t("app.editorTitle", "NETRA Studio")
-				: t("app.name", "NETRA");
+				? t("app.editorTitle", "Netra Studio")
+				: t("app.name", "Netra");
 	}, [windowType, t]);
 
 	let content;
@@ -82,12 +82,12 @@ export default function App() {
 					<div className="flex items-center gap-4 rounded-2xl border border-foreground/10 bg-foreground/5 px-6 py-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
 						<img
 							src={appIconSrc}
-							alt={t("app.name", "NETRA")}
+							alt={t("app.name", "Netra")}
 							className="h-12 w-12 rounded-xl"
 						/>
 						<div>
 							<h1 className="text-xl font-semibold tracking-tight">
-								{t("app.name", "NETRA")}
+								{t("app.name", "Netra")}
 							</h1>
 							<p className="text-sm text-foreground/65">
 								{t("app.subtitle", "Studio by SNK DevWorks")}

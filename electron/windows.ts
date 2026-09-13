@@ -19,13 +19,28 @@ const nodeRequire = createRequire(import.meta.url);
 const APP_ROOT = path.join(electronWindowsDir, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 const RENDERER_DIST = path.join(APP_ROOT, "dist");
-const WINDOW_ICON_FILENAME =
-	process.platform === "darwin" ? "recordlymac-512.png" : "recordly-512.png";
-const WINDOW_ICON_PATH = path.join(
-	process.env.VITE_PUBLIC || RENDERER_DIST,
-	"app-icons",
-	WINDOW_ICON_FILENAME,
-);
+function resolveWindowIconPath(): string {
+	const publicDir = process.env.VITE_PUBLIC || path.join(APP_ROOT, "public");
+	if (process.platform === "win32") {
+		const winCandidates = [
+			path.join(publicDir, "app-icons", "icon.ico"),
+			path.join(APP_ROOT, "icons", "icons", "win", "icon.ico"),
+			path.join(publicDir, "icon.ico"),
+			path.join(RENDERER_DIST, "app-icons", "icon.ico"),
+			path.join(publicDir, "app-icons", "netra-512.png"),
+			path.join(publicDir, "app-icons", "netra-256.png"),
+		];
+		for (const candidate of winCandidates) {
+			if (fs.existsSync(candidate)) return candidate;
+		}
+	}
+	const filename = process.platform === "darwin" ? "netramac-512.png" : "netra-512.png";
+	const candidate = path.join(publicDir, "app-icons", filename);
+	if (fs.existsSync(candidate)) return candidate;
+	return path.join(RENDERER_DIST, "app-icons", filename);
+}
+
+const WINDOW_ICON_PATH = resolveWindowIconPath();
 
 let hudOverlayWindow: BrowserWindow | null = null;
 let hudOverlayHiddenFromCapture = true;
@@ -469,6 +484,9 @@ export function createHudOverlayWindow(): BrowserWindow {
 		...getHudOverlayTaskbarOptions(process.platform),
 		hasShadow: false,
 		show: false,
+		...(process.platform !== "darwin" && {
+			icon: WINDOW_ICON_PATH,
+		}),
 		webPreferences: {
 			preload: path.join(electronWindowsDir, "preload.mjs"),
 			nodeIntegration: false,
@@ -477,6 +495,9 @@ export function createHudOverlayWindow(): BrowserWindow {
 			backgroundThrottling: false,
 		},
 	});
+	if (process.platform === "win32" && fs.existsSync(WINDOW_ICON_PATH)) {
+		win.setIcon(WINDOW_ICON_PATH);
+	}
 	// Keep the recording controls and webcam above normal and full-screen apps.
 	// Transparent regions remain click-through via setIgnoreMouseEvents().
 	win.setAlwaysOnTop(true, "screen-saver");
@@ -621,6 +642,18 @@ export function createHudOverlayWindow(): BrowserWindow {
 	};
 	screen.on("display-removed", handleDisplayRemoved);
 	screen.on("display-metrics-changed", handleDisplayMetricsChanged);
+
+	win.on("restore", () => {
+		if (!win.isDestroyed()) {
+			win.webContents.send("hud-overlay-restored");
+		}
+	});
+
+	win.on("show", () => {
+		if (!win.isDestroyed()) {
+			win.webContents.send("hud-overlay-restored");
+		}
+	});
 
 	win.on("closed", () => {
 		ipcMain.removeListener("hud-overlay-renderer-ready", handleHudRendererReady);
@@ -926,7 +959,7 @@ export function createEditorWindow(): BrowserWindow {
 		resizable: true,
 		alwaysOnTop: false,
 		skipTaskbar: false,
-		title: "NETRA",
+		title: "Netra",
 		show: false,
 		backgroundColor: "#000000",
 		webPreferences: {
@@ -937,6 +970,10 @@ export function createEditorWindow(): BrowserWindow {
 			backgroundThrottling: false,
 		},
 	});
+
+	if (process.platform === "win32" && fs.existsSync(WINDOW_ICON_PATH)) {
+		win.setIcon(WINDOW_ICON_PATH);
+	}
 
 	win.once("ready-to-show", () => {
 		console.log(`[PERF:MAIN] Editor Window: ready-to-show in ${Date.now() - perfStart}ms`);
@@ -1008,6 +1045,10 @@ export function createSourceSelectorWindow(): BrowserWindow {
 			contextIsolation: true,
 		},
 	});
+
+	if (process.platform === "win32" && fs.existsSync(WINDOW_ICON_PATH)) {
+		win.setIcon(WINDOW_ICON_PATH);
+	}
 
 	win.webContents.on("did-finish-load", () => {
 		setTimeout(() => {

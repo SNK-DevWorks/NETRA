@@ -8,8 +8,6 @@ import {
 } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import { useScopedT } from "@/contexts/I18nContext";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import styles from "./LaunchWindow.module.css";
 
 interface RecordingControlsProps {
@@ -40,66 +38,60 @@ export const RecordingControls = ({
 	const memoizedControls = useMemo(() => {
 		return (
 			<>
-				<div className="flex items-center gap-[5px]">
+				<div className={styles.recStatusPill}>
 					<div
-						className={`w-[7px] h-[7px] rounded-full ${
+						className={`w-[7px] h-[7px] rounded-full shrink-0 ${
 							paused ? "bg-[#fbbf24]" : `bg-[#f43f5e] ${styles.recDotBlink}`
 						}`}
 					/>
 					<span
-						className={`text-[10px] font-bold tracking-[0.06em] ${
+						className={`text-[11px] font-bold tracking-wider ${
 							paused ? "text-[#fbbf24]" : "text-[#f43f5e]"
 						}`}
 					>
 						{paused ? t("recording.paused") : t("recording.rec")}
 					</span>
+					<span
+						className={`font-mono text-[12px] font-semibold min-w-[48px] text-center tracking-normal ${
+							paused ? "text-[#fbbf24]" : "text-[var(--launch-text)]"
+						}`}
+					>
+						{formatTime(elapsed)}
+					</span>
 				</div>
 
-				<span
-					className={`font-mono text-xs font-semibold min-w-[52px] text-center tracking-[0.02em] ${
-						paused ? "text-[#fbbf24]" : "text-[var(--launch-text)]"
-					}`}
+				<div className={styles.sep} />
+
+				<button
+					type="button"
+					className={`${styles.pillBtn} ${styles.electronNoDrag} ${microphoneEnabled ? styles.pillBtnActive : ""}`}
+					title={t("recording.micToggleDisabledTip")}
+					aria-label={t("recording.micToggleDisabledTip")}
+					disabled
+					onClick={onToggleMicrophone}
 				>
-					{formatTime(elapsed)}
-				</span>
+					{microphoneEnabled ? (
+						<MicrophoneIcon size={18} />
+					) : (
+						<MicrophoneSlashIcon size={18} />
+					)}
+				</button>
 
-				<Separator orientation="vertical" className="mx-[5px] h-6" />
+				<div className={styles.sep} />
 
-				<span title={t("recording.micToggleDisabledTip")}>
-					<Button
-						variant="ghost"
-						size="icon"
-						iconSize="lg"
-						className={microphoneEnabled ? styles.ibActive : ""}
-						aria-label={t("recording.micToggleDisabledTip")}
-						disabled
-						onClick={onToggleMicrophone}
-					>
-						{microphoneEnabled ? (
-							<MicrophoneIcon size={18} />
-						) : (
-							<MicrophoneSlashIcon size={18} />
-						)}
-					</Button>
-				</span>
-
-				<Separator orientation="vertical" className="mx-[5px] h-6" />
-
-				<Button
-					variant={paused ? "default" : "ghost"}
-					size="icon"
-					iconSize="lg"
+				<button
+					type="button"
+					className={`${styles.pillBtn} ${styles.electronNoDrag} ${paused ? styles.pillBtnPaused : ""}`}
 					onClick={onPauseResume}
 					title={paused ? t("recording.resume") : t("recording.pause")}
 					aria-label={paused ? t("recording.resume") : t("recording.pause")}
-					className={paused ? styles.ibGreen : ""}
 				>
 					{paused ? (
-						<PlayIcon size={18} fill="currentColor" strokeWidth={0} />
+						<PlayIcon size={18} weight="fill" />
 					) : (
-						<PauseIcon size={18} />
+						<PauseIcon size={18} weight="fill" />
 					)}
-				</Button>
+				</button>
 
 				<button
 					type="button"
@@ -111,27 +103,25 @@ export const RecordingControls = ({
 					<span className={styles.stopSquare} />
 				</button>
 
-				<Button
-					variant="ghost"
-					size="icon"
-					iconSize="lg"
+				<button
+					type="button"
 					onClick={onHideHud}
 					title={t("recording.hideHud")}
 					aria-label={t("recording.hideHud")}
+					className={`${styles.pillBtn} ${styles.electronNoDrag}`}
 				>
-					<MinusIcon size={16} />
-				</Button>
+					<MinusIcon size={16} weight="bold" />
+				</button>
 
-				<Button
-					variant="ghost"
-					size="icon"
-					iconSize="lg"
+				<button
+					type="button"
 					onClick={onCancelRecording}
 					title={t("recording.cancel")}
 					aria-label={t("recording.cancel")}
+					className={`${styles.pillBtn} ${styles.pillBtnClose} ${styles.electronNoDrag}`}
 				>
-					<XIcon size={18} />
-				</Button>
+					<XIcon size={16} weight="bold" />
+				</button>
 			</>
 		);
 	}, [

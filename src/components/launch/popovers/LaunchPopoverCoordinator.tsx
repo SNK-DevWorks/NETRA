@@ -11,7 +11,7 @@ import {
 interface LaunchPopoverCoordinatorValue {
 	openId: string | null;
 	requestOpen: (id: string) => void;
-	requestClose: (id: string) => void;
+	requestClose: (id?: string) => void;
 	isOpen: (id: string) => boolean;
 }
 
@@ -24,8 +24,8 @@ export function LaunchPopoverCoordinatorProvider({ children }: { children: React
 		setOpenId(id);
 	}, []);
 
-	const requestClose = useCallback((id: string) => {
-		setOpenId((currentId) => (currentId === id ? null : currentId));
+	const requestClose = useCallback((id?: string) => {
+		setOpenId((currentId) => (!id || currentId === id ? null : currentId));
 	}, []);
 
 	const isOpen = useCallback((id: string) => openId === id, [openId]);

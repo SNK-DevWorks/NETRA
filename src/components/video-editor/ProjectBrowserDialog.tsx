@@ -109,7 +109,7 @@ export default function ProjectBrowserDialog({
 	}, [open, updatePosition]);
 
 	useEffect(() => {
-		if (!open) {
+		if (!open || renderMode === "inline") {
 			return;
 		}
 
@@ -139,7 +139,7 @@ export default function ProjectBrowserDialog({
 			document.removeEventListener("pointerdown", handlePointerDown);
 			window.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [anchorRef, onOpenChange, open]);
+	}, [anchorRef, onOpenChange, open, renderMode]);
 
 	useEffect(() => {
 		if (!open) {
@@ -174,23 +174,23 @@ export default function ProjectBrowserDialog({
 				ref={panelRef}
 				role="dialog"
 				aria-label="Projects"
-				className="pointer-events-auto mb-1.5 w-[300px] max-h-[400px] overflow-hidden rounded-[14px] border border-foreground/[0.07] bg-editor-panel/[0.96] text-foreground shadow-[0_12px_32px_rgba(0,0,0,0.22),0_2px_10px_rgba(0,0,0,0.1)] animate-in fade-in-0 duration-150"
+				className="pointer-events-auto w-full max-h-[400px] overflow-hidden rounded-[12px]"
 			>
-				<div className="flex items-center justify-between gap-2 border-b border-foreground/10 px-3 py-2.5">
-					<div className="text-sm font-medium tracking-tight text-foreground">
+				<div className="flex items-center justify-between gap-2 border-b border-[var(--launch-border)] px-2.5 py-2">
+					<div className="text-[13px] font-semibold tracking-tight text-[var(--launch-text)]">
 						Projects
 					</div>
 					{onImportFile ? (
 						<button
 							type="button"
 							onClick={onImportFile}
-							className="rounded-md px-2 py-1 text-xs font-medium text-foreground/70 transition hover:bg-foreground/10 hover:text-foreground"
+							className="rounded-md px-2 py-0.5 text-xs font-medium text-[var(--launch-text-muted)] transition hover:bg-[var(--launch-pill-hover)] hover:text-[var(--launch-text)]"
 						>
 							Import
 						</button>
 					) : null}
 				</div>
-				<div className="max-h-[360px] overflow-y-auto px-2.5 py-2.5">
+				<div className="max-h-[360px] overflow-y-auto px-1 py-2">
 					{visibleEntries.length > 0 ? (
 						<div className="grid grid-cols-2 gap-2">
 							{visibleEntries.map((entry) => {
@@ -202,9 +202,9 @@ export default function ProjectBrowserDialog({
 										key={entry.path}
 										type="button"
 										onClick={() => onOpenProject(entry.path)}
-										className="group flex flex-col gap-1 rounded-lg bg-transparent p-0.5 text-left outline-none transition focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+										className="group flex flex-col gap-1 rounded-lg bg-transparent p-1 text-left outline-none transition hover:bg-[var(--launch-pill-hover)] focus:outline-none"
 									>
-										<div className="relative aspect-[16/10] w-full overflow-hidden rounded-[5px] bg-editor-dialog-alt shadow-[0_10px_18px_rgba(0,0,0,0.28)] transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_16px_30px_rgba(0,0,0,0.38)]">
+										<div className="relative aspect-[16/10] w-full overflow-hidden rounded-[7px] border border-[var(--launch-border)] bg-[var(--launch-pill-bg)] shadow-[0_4px_12px_rgba(0,0,0,0.2)] transition duration-200 group-hover:-translate-y-0.5">
 											{thumbnailSrc ? (
 												<img
 													src={thumbnailSrc}
@@ -213,7 +213,7 @@ export default function ProjectBrowserDialog({
 													draggable={false}
 												/>
 											) : (
-												<div className="flex h-full w-full items-center justify-center bg-[linear-gradient(180deg,_rgba(37,99,235,0.22),_rgba(13,17,23,0.92))] text-[10px] font-medium text-white/60">
+												<div className="flex h-full w-full items-center justify-center bg-[var(--launch-pill-bg)] text-[10px] font-medium text-[var(--launch-text-muted)]">
 													No preview yet
 												</div>
 											)}
@@ -226,7 +226,7 @@ export default function ProjectBrowserDialog({
 											) : null}
 										</div>
 										<div className="flex flex-1 flex-col px-0.5 py-0.5">
-											<div className="truncate text-[11px] font-semibold tracking-tight text-foreground">
+											<div className="truncate text-[11px] font-semibold tracking-tight text-[var(--launch-text)]">
 												{entry.name}
 											</div>
 										</div>
@@ -235,8 +235,8 @@ export default function ProjectBrowserDialog({
 							})}
 						</div>
 					) : (
-						<div className="flex min-h-[140px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-foreground/10 bg-editor-bg px-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-							<div className="text-sm font-semibold text-foreground">
+						<div className="flex min-h-[80px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--launch-border)] bg-[var(--launch-pill-bg)] px-4 py-3 text-center">
+							<div className="text-xs font-medium text-[var(--launch-text-muted)]">
 								No saved projects yet
 							</div>
 						</div>

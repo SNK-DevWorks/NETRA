@@ -31,6 +31,7 @@ export function ProjectPopover({
 			}}
 			trigger={trigger}
 			align="center"
+			sideOffset={9}
 		>
 			<Suspense fallback={null}>
 				<ProjectBrowserDialog

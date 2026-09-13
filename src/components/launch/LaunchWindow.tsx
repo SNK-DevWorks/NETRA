@@ -12,15 +12,13 @@ import {
 	XIcon,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef } from "react";
-import { RxDragHandleDots2 } from "react-icons/rx";
-import { Separator } from "@/components/ui/separator";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import netraLogo from "../../assets/netra-logo.png";
 import { useScopedT } from "../../contexts/I18nContext";
 import { useMicrophoneDevices } from "../../hooks/useMicrophoneDevices";
 import { useScreenRecorder } from "../../hooks/useScreenRecorder";
 import { useVideoDevices } from "../../hooks/useVideoDevices";
 import { supportsHudCaptureProtection } from "../../lib/hudCaptureProtection";
-import { Button } from "../ui/button";
 import { HudInteractionContext } from "./contexts/HudInteractionContext";
 import { canToggleFloatingWebcamPreview } from "./floatingWebcamPreview";
 import { useHudBarDrag } from "./hooks/useHudBarDrag";
@@ -207,6 +205,108 @@ function LaunchWindowContent() {
 		ease: [0.22, 1, 0.36, 1] as const,
 	};
 
+	const [hudWindowState, setHudWindowState] = useState<
+		"visible" | "minimized" | "closing"
+	>("visible");
+	const [restoreKey, setRestoreKey] = useState(0);
+	const wasMinimizedRef = useRef(false);
+
+	const macosMinimizeVariants = useMemo(
+		() => ({
+			initial: {
+				opacity: 0,
+				x: -recordingHudOffset.x,
+				y: -recordingHudOffset.y + 80,
+				scaleX: 0.1,
+				scaleY: 0.02,
+				scale: 0.12,
+				filter: "blur(4px)",
+			},
+			visible: {
+				opacity: 1,
+				x: 0,
+				y: 0,
+				scaleX: 1,
+				scaleY: 1,
+				scale: 1,
+				filter: "blur(0px)",
+				transition: {
+					type: "spring" as const,
+					stiffness: 320,
+					damping: 24,
+					mass: 0.85,
+				},
+			},
+			minimized: {
+				opacity: 0,
+				x: -recordingHudOffset.x,
+				y: -recordingHudOffset.y + 80,
+				scaleX: 0.1,
+				scaleY: 0.02,
+				scale: 0.12,
+				filter: "blur(4px)",
+				transition: {
+					duration: 0.3,
+					ease: [0.32, 0, 0.67, 0] as const,
+				},
+			},
+			closing: {
+				opacity: 0,
+				scale: 0.88,
+				y: -12,
+				filter: "blur(4px)",
+				transition: {
+					duration: 0.18,
+					ease: [0.16, 1, 0.3, 1] as const,
+				},
+			},
+		}),
+		[recordingHudOffset.x, recordingHudOffset.y],
+	);
+
+	const handleMinimize = useCallback(() => {
+		if (hudWindowState !== "visible") return;
+		requestClose();
+		wasMinimizedRef.current = true;
+		setHudWindowState("minimized");
+	}, [hudWindowState, requestClose]);
+
+	const handleClose = useCallback(() => {
+		if (hudWindowState !== "visible") return;
+		requestClose();
+		setHudWindowState("closing");
+	}, [hudWindowState, requestClose]);
+
+	useEffect(() => {
+		const triggerRestore = () => {
+			wasMinimizedRef.current = false;
+			setHudWindowState("visible");
+			setRestoreKey((k) => k + 1);
+		};
+
+		const cleanup = window.electronAPI?.onHudOverlayRestored?.(triggerRestore);
+
+		const handleFocus = () => {
+			if (wasMinimizedRef.current) {
+				triggerRestore();
+			}
+		};
+		window.addEventListener("focus", handleFocus);
+
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === "visible" && wasMinimizedRef.current) {
+				triggerRestore();
+			}
+		};
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+
+		return () => {
+			cleanup?.();
+			window.removeEventListener("focus", handleFocus);
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
+		};
+	}, []);
+
 	const recordingControls = (
 		<RecordingControls
 			paused={paused}
@@ -215,7 +315,7 @@ function LaunchWindowContent() {
 			onToggleMicrophone={() => setMicrophoneEnabled(!microphoneEnabled)}
 			onPauseResume={paused ? resumeRecording : pauseRecording}
 			onStopRecording={toggleRecording}
-			onHideHud={() => window.electronAPI?.hudOverlayHide?.()}
+			onHideHud={handleMinimize}
 			onCancelRecording={cancelRecording}
 			formatTime={formatTime}
 		/>
@@ -230,27 +330,27 @@ function LaunchWindowContent() {
 						onSourceSelect={handleSourceSelect}
 						onOpen={beginInteractiveHudAction}
 						trigger={
-							<Button
-								variant="outline"
-								size="lg"
-								className={`${styles.electronNoDrag} group gap-2 px-3 min-w-0 max-w-[180px] rounded-[11px] font-medium text-[12px] shrink-0 border-[var(--launch-border)] bg-[var(--launch-surface)] text-[var(--launch-text)] hover:border-[var(--launch-border-strong)] hover:bg-[var(--launch-hover)] transition-all ${openId === "sources" ? "border-[var(--launch-border-strong)] bg-[var(--launch-hover)]" : ""}`}
+							<button
+								type="button"
+								className={`${styles.electronNoDrag} ${styles.sourcePill} ${openId === "sources" ? styles.sourcePillActive : ""}`}
 								title={selectedSource}
 							>
-								<MonitorIcon size={16} className="shrink-0" />
-								<div className="flex-1 min-w-0 overflow-hidden">
+								<MonitorIcon size={17} className="shrink-0 text-[var(--launch-text-muted)]" />
+								<div className="flex-1 min-w-0 overflow-hidden text-left font-medium">
 									<MarqueeText text={selectedSource} />
 								</div>
 								<CaretUpIcon
-									size={10}
-									className={`text-[#6b6b78] ml-0.5 shrink-0 transition-transform duration-200 ${
+									size={11}
+									weight="bold"
+									className={`ml-0.5 shrink-0 opacity-70 transition-transform duration-200 ${
 										openId === "sources" ? "" : "rotate-180"
 									}`}
 								/>
-							</Button>
+							</button>
 						}
 					/>
 
-					<Separator orientation="vertical" className="mx-[5px] h-6" />
+					<div className={styles.sep} />
 				</>
 			)}
 
@@ -269,23 +369,21 @@ function LaunchWindowContent() {
 					setMicrophoneDeviceId(deviceId === "default" ? undefined : deviceId);
 				}}
 				trigger={
-					<Button
-						variant="ghost"
-						size="icon"
-						iconSize="lg"
+					<button
+						type="button"
 						title={
 							microphoneEnabled
 								? t("recording.disableMicrophone")
 								: t("recording.enableMicrophone")
 						}
-						className={microphoneEnabled ? styles.ibActive : ""}
+						className={`${styles.pillBtn} ${styles.electronNoDrag} ${microphoneEnabled ? styles.pillBtnActive : ""}`}
 					>
 						{microphoneEnabled ? (
 							<MicrophoneIcon size={18} />
 						) : (
 							<MicrophoneSlashIcon size={18} />
 						)}
-					</Button>
+					</button>
 				}
 			/>
 
@@ -309,23 +407,21 @@ function LaunchWindowContent() {
 					setWebcamDeviceId(deviceId);
 				}}
 				trigger={
-					<Button
-						variant="ghost"
-						size="icon"
-						iconSize="lg"
+					<button
+						type="button"
 						title={
 							webcamEnabled
 								? t("recording.disableWebcam")
 								: t("recording.enableWebcam")
 						}
-						className={webcamEnabled ? styles.ibActive : ""}
+						className={`${styles.pillBtn} ${styles.electronNoDrag} ${webcamEnabled ? styles.pillBtnActive : ""}`}
 					>
 						{webcamEnabled ? (
 							<VideoCameraIcon size={18} />
 						) : (
 							<VideoCameraSlashIcon size={18} />
 						)}
-					</Button>
+					</button>
 				}
 			/>
 
@@ -333,15 +429,13 @@ function LaunchWindowContent() {
 				countdownDelay={countdownDelay}
 				onSelectDelay={setCountdownDelay}
 				trigger={
-					<Button
-						variant="ghost"
-						size="icon"
-						iconSize="lg"
+					<button
+						type="button"
 						title={t("recording.countdownDelay")}
-						className={countdownDelay > 0 ? styles.ibActive : ""}
+						className={`${styles.pillBtn} ${styles.electronNoDrag} ${countdownDelay > 0 ? styles.pillBtnActive : ""}`}
 					>
 						<TimerIcon size={18} />
-					</Button>
+					</button>
 				}
 			/>
 
@@ -362,15 +456,8 @@ function LaunchWindowContent() {
 				<div className={styles.recDot} />
 			</button>
 
-			<Separator orientation="vertical" className="mx-[5px] h-6" />
+			<div className={styles.sep} />
 
-			<div className="relative w-0 h-0">
-				<ProjectPopover
-					entries={projectLibraryEntries}
-					onOpenProject={openProjectFromLibrary}
-					trigger={<div className="absolute inset-0 pointer-events-none opacity-0" />}
-				/>
-			</div>
 
 			<MorePopover
 				supportsHudCaptureProtection={hudCaptureProtectionSupported}
@@ -385,9 +472,8 @@ function LaunchWindowContent() {
 					void openVideoFile();
 				}}
 				onOpenProjectBrowser={() => {
-					refreshProjectLibrary().then(() => {
-						requestOpen("projects");
-					});
+					requestOpen("projects");
+					void refreshProjectLibrary();
 				}}
 				showDevUpdatePreview={SHOW_DEV_UPDATE_PREVIEW}
 				onPreviewUpdateUi={() => {
@@ -398,31 +484,33 @@ function LaunchWindowContent() {
 				}}
 				appVersion={appVersion}
 				trigger={
-					<Button variant="ghost" size="icon" iconSize="lg" title={t("recording.more")}>
-						<DotsThreeVerticalIcon size={18} />
-					</Button>
+					<button
+						type="button"
+						title={t("recording.more")}
+						className={`${styles.pillBtn} ${styles.electronNoDrag} ${openId === "more" ? styles.pillBtnActive : ""}`}
+					>
+						<DotsThreeVerticalIcon size={18} weight="bold" />
+					</button>
 				}
 			/>
 
-			<Button
-				variant="ghost"
-				size="icon"
-				iconSize="lg"
-				onClick={() => window.electronAPI?.hudOverlayHide?.()}
+			<button
+				type="button"
+				onClick={handleMinimize}
 				title={t("recording.hideHud")}
+				className={`${styles.pillBtn} ${styles.electronNoDrag}`}
 			>
-				<MinusIcon size={16} />
-			</Button>
+				<MinusIcon size={16} weight="bold" />
+			</button>
 
-			<Button
-				variant="ghost"
-				size="icon"
-				iconSize="lg"
-				onClick={() => window.electronAPI?.hudOverlayClose?.()}
+			<button
+				type="button"
+				onClick={handleClose}
 				title={t("recording.closeApp")}
+				className={`${styles.pillBtn} ${styles.pillBtnClose} ${styles.electronNoDrag}`}
 			>
-				<XIcon size={16} />
-			</Button>
+				<XIcon size={16} weight="bold" />
+			</button>
 		</>
 	);
 
@@ -461,26 +549,54 @@ function LaunchWindowContent() {
 							}}
 						>
 							<motion.div
-								ref={hudBarRef}
-								layout={shouldAnimateHudLayout}
-								transition={hudStateTransition}
-								className={`${styles.bar} launch-theme mb-2 pointer-events-auto`}
-								onMouseEnter={handleHudMouseEnter}
-								onMouseLeave={handleHudMouseLeave}
+								key={restoreKey}
+								variants={macosMinimizeVariants}
+								initial="initial"
+								animate={hudWindowState}
+								style={{ transformOrigin: "50% 100%" }}
+								onAnimationComplete={(definition) => {
+									if (definition === "minimized") {
+										window.electronAPI?.hudOverlayHide?.();
+									} else if (definition === "closing") {
+										window.electronAPI?.hudOverlayClose?.();
+									}
+								}}
+								className="pointer-events-auto"
 							>
+								<motion.div
+									ref={hudBarRef}
+									layout={shouldAnimateHudLayout}
+									transition={hudStateTransition}
+									className={`${styles.bar} launch-theme mb-2 pointer-events-auto`}
+									onMouseEnter={handleHudMouseEnter}
+									onMouseLeave={handleHudMouseLeave}
+								>
+									<div className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 pointer-events-none">
+										<ProjectPopover
+											entries={projectLibraryEntries}
+											onOpenProject={openProjectFromLibrary}
+											trigger={<div className="w-0 h-0 pointer-events-none" />}
+										/>
+									</div>
 								<div
 									// Linux compositors and non-passthrough Windows fallback windows
 									// need native window dragging; the JS drag path only translates
 									// content inside the HUD window.
-									className={`flex items-center px-0.5 cursor-grab active:cursor-grabbing ${
+									className={`${styles.dragHandle} ${
 										useNativeHudBarDrag ? styles.electronDrag : ""
 									}`}
+									title="Netra"
 									onPointerDown={handleHudBarPointerDown}
 									onPointerMove={handleHudBarPointerMove}
 									onPointerUp={handleHudBarPointerUp}
 									onPointerCancel={handleHudBarPointerUp}
 								>
-									<RxDragHandleDots2 size={14} className="text-[#6b6b78]" />
+									<img
+										src={netraLogo}
+										alt="Netra"
+										className={styles.hudLogo}
+										draggable={false}
+									/>
 								</div>
 
 								<div className={styles.barStateViewport}>
@@ -518,7 +634,8 @@ function LaunchWindowContent() {
 									</AnimatePresence>
 								</div>
 							</motion.div>
-						</div>
+						</motion.div>
+					</div>
 						{showRecordingWebcamPreview && (
 							<div
 								ref={recordingWebcamPreviewContainerRef}

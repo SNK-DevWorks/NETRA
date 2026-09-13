@@ -1,6 +1,7 @@
 import { MicrophoneIcon, MicrophoneSlashIcon } from "@phosphor-icons/react";
 import type { ReactElement, ReactNode } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useAudioLevelMeter } from "@/hooks/useAudioLevelMeter";
 import { AudioLevelMeter } from "@/components/ui/audio-level-meter";
 import styles from "../LaunchWindow.module.css";
@@ -28,7 +29,7 @@ export function DropdownItem({
 			onClick={onClick}
 		>
 			<span className="shrink-0">{icon}</span>
-			<span className="truncate">{children}</span>
+			<span className="truncate flex-1">{children}</span>
 			{trailing}
 		</button>
 	);
@@ -69,26 +70,33 @@ export function HudPopover({
 	trigger,
 	children,
 	align = "center",
+	sideOffset = 14,
+	className,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	trigger: ReactElement;
 	children: ReactNode;
 	align?: "start" | "center" | "end";
+	sideOffset?: number;
+	className?: string;
 }) {
 	const { onMouseEnter } = useHudInteraction();
 	return (
 		<Popover open={open} onOpenChange={onOpenChange} modal={false}>
 			<PopoverTrigger asChild>{trigger}</PopoverTrigger>
 			<PopoverContent
-				className={`launch-theme ${styles.menuCard} ${styles.electronNoDrag}`}
+				className={cn(
+					`launch-theme ${styles.menuCard} ${styles.electronNoDrag}`,
+					className,
+				)}
 				data-hud-interactive
 				unstyled
 				side="top"
 				align={align}
-				sideOffset={8}
+				sideOffset={sideOffset}
 				avoidCollisions
-				collisionPadding={10}
+				collisionPadding={16}
 				usePortal={false}
 				onMouseEnter={onMouseEnter}
 			>

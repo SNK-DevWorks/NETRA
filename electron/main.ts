@@ -113,6 +113,9 @@ async function logSmokeExportGpuDiagnostics() {
 }
 
 configureGpuAccelerationSwitches();
+if (process.platform === "win32") {
+	app.setAppUserModelId("dev.snkdevworks.netra");
+}
 
 async function ensureRecordingsDir() {
 	try {
@@ -292,12 +295,14 @@ function showHudOverlayFromTray() {
 		hud.showInactive();
 		hud.moveTop();
 		reassertHudOverlayMouseState();
+		hud.webContents.send("hud-overlay-restored");
 		return true;
 	}
 
 	hud.show();
 	hud.moveTop();
 	hud.focus();
+	hud.webContents.send("hud-overlay-restored");
 	return true;
 }
 
@@ -705,7 +710,7 @@ ipcMain.handle("check-for-app-updates", async () => {
 function updateTrayMenu(recording: boolean = false) {
 	if (!tray) return;
 	const trayIcon = recording ? getRecordingTrayIcon() : getDefaultTrayIcon();
-	const trayToolTip = recording ? `Recording: ${selectedSourceName}` : "NETRA";
+	const trayToolTip = recording ? `Recording: ${selectedSourceName}` : "Netra";
 	const menuTemplate = recording
 		? [
 				{
