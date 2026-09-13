@@ -1,0 +1,26 @@
+{
+	"app": {
+		"name": "NETRA",
+		"editorTitle": "NETRA Studio",
+		"subtitle": "Studio by SNK DevWorks",
+		"language": "Idioma",
+		"manageRecordings": "Abrir carpeta de grabaciones"
+	},
+	"actions": {
+		"cancel": "Cancelar",
+		"close": "Cerrar",
+		"export": "Exportar",
+		"load": "Cargar",
+		"redo": "Rehacer",
+		"reset": "Restablecer",
+		"save": "Guardar",
+		"undo": "Deshacer",
+		"delete": "Eliminar",
+		"done": "Hecho"
+	},
+	"errors": {
+		"invalidFileType": "Tipo de archivo inválido",
+		"failedToUploadImage": "Error al subir la imagen",
+		"fileReadError": "Hubo un error al leer el archivo."
+	}
+}
