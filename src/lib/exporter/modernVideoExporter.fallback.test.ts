@@ -317,7 +317,7 @@ describe("ModernVideoExporter native fallback routing", () => {
 				userAgent: string;
 				logicalProcessors: number;
 				deviceMemoryGb: number;
-				hardware: RendererExportHardwareInfo;
+				hardware: unknown;
 			};
 			backpressureProfile: {
 				name: string;
@@ -335,7 +335,7 @@ describe("ModernVideoExporter native fallback routing", () => {
 		exporter.mediaSourceRetryAttempted = true;
 		exporter.effectiveDurationSec = 10;
 		exporter.runtimeDiagnostics = {
-			appVersion: "1.4.0",
+			appVersion: "1.0.0",
 			userAgent: "NETRATest/1.0 Electron/43.1.0",
 			logicalProcessors: 12,
 			deviceMemoryGb: 8,
@@ -378,7 +378,7 @@ describe("ModernVideoExporter native fallback routing", () => {
 		expect(report).toContain("Failure code: VIDEO_DECODE_ENCODING_ERROR");
 		expect(report).toContain("Failure stage: Input video decoding");
 		expect(report).toContain("Output: 1200x570 @ 60 FPS; 8.00 Mbps; mode=default");
-		expect(report).toContain("NETRA version: 1.4.0");
+		expect(report).toContain("NETRA version: 1.0.0");
 		expect(report).toContain("Runtime: NETRATest/1.0 Electron/43.1.0");
 		expect(report).toContain("System: win32 10.0.26100 (x64); model=Custom PC");
 		expect(report).toContain("CPU: AMD Ryzen 9 7900X; 24 logical processors");

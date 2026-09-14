@@ -4,7 +4,6 @@ import {
 	FolderOpenIcon,
 	TranslateIcon,
 	VideoCameraIcon,
-	ArrowClockwiseIcon,
 	SunIcon,
 	MoonIcon,
 	DesktopIcon,
@@ -43,8 +42,6 @@ export function MorePopover({
 	onChooseRecordingsDirectory,
 	onOpenVideoFile,
 	onOpenProjectBrowser,
-	showDevUpdatePreview,
-	onPreviewUpdateUi,
 	appVersion,
 }: {
 	trigger: ReactElement;
@@ -54,8 +51,6 @@ export function MorePopover({
 	onChooseRecordingsDirectory: () => void;
 	onOpenVideoFile: () => void;
 	onOpenProjectBrowser: () => void;
-	showDevUpdatePreview: boolean;
-	onPreviewUpdateUi: () => void;
 	appVersion: string | null;
 }) {
 	const t = useScopedT("launch");
@@ -117,17 +112,7 @@ export function MorePopover({
 			>
 				{t("recording.openProject")}
 			</DropdownItem>
-			{showDevUpdatePreview ? (
-				<DropdownItem
-					icon={<ArrowClockwiseIcon size={16} />}
-					onClick={() => {
-						requestClose(POPOVER_ID);
-						onPreviewUpdateUi();
-					}}
-				>
-					{t("recording.previewUpdateUi", "Preview Update UI")}
-				</DropdownItem>
-			) : null}
+
 			<div className={styles.ddLabel} style={{ marginTop: 4 }}>
 				{t("recording.appearance", "Appearance")}
 			</div>
