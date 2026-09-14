@@ -20,6 +20,8 @@ interface UseTimelineKeyboardShortcutsParams {
 	addKeyframe: () => void;
 	handleAddZoom: () => void;
 	handleSplitClip: () => void;
+	handleRippleDeleteLeft?: () => void;
+	handleRippleDeleteRight?: () => void;
 	handleAddAnnotation: () => void;
 	deleteSelectedKeyframe: () => void;
 	deleteSelectedZoom: () => void;
@@ -47,6 +49,8 @@ export function useTimelineKeyboardShortcuts({
 	addKeyframe,
 	handleAddZoom,
 	handleSplitClip,
+	handleRippleDeleteLeft,
+	handleRippleDeleteRight,
 	handleAddAnnotation,
 	deleteSelectedKeyframe,
 	deleteSelectedZoom,
@@ -83,7 +87,21 @@ export function useTimelineKeyboardShortcuts({
 
 			if (matchesShortcut(e, keyShortcuts.addKeyframe, isMac)) addKeyframe();
 			if (matchesShortcut(e, keyShortcuts.addZoom, isMac)) handleAddZoom();
-			if (matchesShortcut(e, keyShortcuts.splitClip, isMac)) handleSplitClip();
+			if (
+				matchesShortcut(e, keyShortcuts.splitClip, isMac) ||
+				((e.key === "b" || e.key === "B") && (e.ctrlKey || e.metaKey))
+			) {
+				e.preventDefault();
+				handleSplitClip();
+			}
+			if ((e.key === "q" || e.key === "Q") && !e.ctrlKey && !e.metaKey && !e.altKey) {
+				e.preventDefault();
+				handleRippleDeleteLeft?.();
+			}
+			if ((e.key === "w" || e.key === "W") && !e.ctrlKey && !e.metaKey && !e.altKey) {
+				e.preventDefault();
+				handleRippleDeleteRight?.();
+			}
 			if (matchesShortcut(e, keyShortcuts.addAnnotation, isMac)) {
 				handleAddAnnotation();
 			}
@@ -143,6 +161,8 @@ export function useTimelineKeyboardShortcuts({
 		handleAddAnnotation,
 		handleAddZoom,
 		handleSplitClip,
+		handleRippleDeleteLeft,
+		handleRippleDeleteRight,
 		hasAnyZoomBlocks,
 		isMac,
 		isTimelineFocusedRef,

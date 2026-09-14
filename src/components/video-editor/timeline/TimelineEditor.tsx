@@ -51,6 +51,8 @@ export interface TimelineEditorProps {
 	onTrimSpanChange?: (id: string, span: Span) => void;
 	clipRegions?: ClipRegion[];
 	onClipSplit?: (splitMs: number) => void;
+	onRippleDeleteLeft?: (splitMs: number) => void;
+	onRippleDeleteRight?: (splitMs: number) => void;
 	onClipSpanChange?: (id: string, span: Span) => void;
 	onClipDelete?: (id: string) => void;
 	selectedClipId?: string | null;
@@ -107,6 +109,8 @@ export interface TimelineEditorHandle {
 	addZoom: () => void;
 	suggestZooms: () => void;
 	splitClip: () => void;
+	rippleDeleteLeft: () => void;
+	rippleDeleteRight: () => void;
 	addAnnotation: (trackIndex?: number) => void;
 	addAudio: (trackIndex?: number) => Promise<void>;
 	keyframes: { id: string; time: number }[];
@@ -134,6 +138,8 @@ const TimelineEditor = forwardRef<TimelineEditorHandle, TimelineEditorProps>(
 			onTrimSpanChange,
 			clipRegions = [],
 			onClipSplit,
+			onRippleDeleteLeft,
+			onRippleDeleteRight,
 			onClipSpanChange,
 			onClipDelete,
 			selectedClipId,
@@ -373,6 +379,8 @@ const TimelineEditor = forwardRef<TimelineEditorHandle, TimelineEditorProps>(
 			onTrimSpanChange,
 			clipRegions,
 			onClipSplit,
+			onRippleDeleteLeft,
+			onRippleDeleteRight,
 			onClipSpanChange,
 			onClipDelete,
 			selectedClipId,

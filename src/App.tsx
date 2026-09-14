@@ -78,7 +78,7 @@ export default function App() {
 			break;
 		default:
 			content = (
-				<div className="flex h-full w-full items-center justify-center bg-editor-bg text-foreground">
+				<div className="flex h-full w-full flex-col items-center justify-center bg-editor-bg text-foreground gap-4">
 					<div className="flex items-center gap-4 rounded-2xl border border-foreground/10 bg-foreground/5 px-6 py-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
 						<img
 							src={appIconSrc}
@@ -93,6 +93,26 @@ export default function App() {
 								{t("app.subtitle", "Studio by SNK DevWorks")}
 							</p>
 						</div>
+					</div>
+					<div className="flex items-center gap-2">
+						<a
+							href="?windowType=editor"
+							className="rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-lg transition-colors hover:bg-blue-600"
+						>
+							Open Video Editor
+						</a>
+						<a
+							href="?windowType=hud-overlay"
+							className="rounded-lg border border-foreground/10 bg-foreground/5 px-4 py-2 text-xs font-medium text-foreground/80 transition-colors hover:bg-foreground/10"
+						>
+							HUD Overlay
+						</a>
+						<a
+							href="?windowType=source-selector"
+							className="rounded-lg border border-foreground/10 bg-foreground/5 px-4 py-2 text-xs font-medium text-foreground/80 transition-colors hover:bg-foreground/10"
+						>
+							Source Selector
+						</a>
 					</div>
 				</div>
 			);

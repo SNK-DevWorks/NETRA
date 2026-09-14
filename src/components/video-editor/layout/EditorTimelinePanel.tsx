@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { useRef, useState, type RefObject } from "react";
 import type { useVideoEditorAudio } from "../audio/useVideoEditorAudio";
 import type { useAnnotationRegionCommands } from "../hooks/useAnnotationRegionCommands";
 import type { useAudioRegionCommands } from "../hooks/useAudioRegionCommands";
@@ -30,6 +30,7 @@ type Props = {
 	disableSuggestedZooms: boolean;
 	currentTime: number;
 	handleSelectAnnotation: (id: string | null) => void;
+	onDropMedia?: (e: React.DragEvent, timeFromCursorSec?: number) => void;
 };
 
 export function EditorTimelinePanel(props: Props) {
@@ -53,10 +54,64 @@ export function EditorTimelinePanel(props: Props) {
 		disableSuggestedZooms,
 		currentTime,
 		handleSelectAnnotation,
+		onDropMedia,
 	} = props;
 
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [isDragOver, setIsDragOver] = useState(false);
+	const [dragIndicatorX, setDragIndicatorX] = useState<number | null>(null);
+	const [dropTimePreview, setDropTimePreview] = useState<number>(0);
+
+	const handleDragOver = (e: React.DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setIsDragOver(true);
+		if (containerRef.current) {
+			const rect = containerRef.current.getBoundingClientRect();
+			const relX = e.clientX - rect.left;
+			setDragIndicatorX(relX);
+			const sidebarW = 56;
+			const trackWidth = Math.max(1, rect.width - sidebarW);
+			const ratio = Math.max(0, Math.min(1, (relX - sidebarW) / trackWidth));
+			setDropTimePreview(ratio * (projection.timelineDuration || 10));
+		}
+	};
+
+	const handleDragLeave = (e: React.DragEvent) => {
+		if (e.currentTarget === e.target) {
+			setIsDragOver(false);
+			setDragIndicatorX(null);
+		}
+	};
+
+	const handleDrop = (e: React.DragEvent) => {
+		setIsDragOver(false);
+		setDragIndicatorX(null);
+		if (onDropMedia) {
+			onDropMedia(e, dropTimePreview);
+		}
+	};
+
 	return (
-		<div className="flex flex-shrink-0 flex-col" style={{ height: "15%", minHeight: 160 }}>
+		<div
+			ref={containerRef}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={handleDrop}
+			className="relative flex flex-1 flex-col min-h-0 h-full"
+		>
+			{/* OpenCut-style DragLine Drop Indicator */}
+			{isDragOver && dragIndicatorX !== null && (
+				<div
+					className="pointer-events-none absolute top-0 bottom-0 z-50 w-0.5 bg-[#2563EB] shadow-[0_0_8px_#2563EB]"
+					style={{ left: `${dragIndicatorX}px` }}
+				>
+					<div className="absolute top-1 left-2 rounded bg-[#2563EB] px-1.5 py-0.5 text-[9px] font-mono font-bold text-white shadow">
+						Drop @ {Math.floor(dropTimePreview / 60)}:
+						{String(Math.floor(dropTimePreview % 60)).padStart(2, "0")}
+					</div>
+				</div>
+			)}
 			<TimelineEditor
 				ref={timelineRef}
 				videoDuration={projection.timelineDuration}
@@ -80,6 +135,8 @@ export function EditorTimelinePanel(props: Props) {
 				trimRegions={timeline.trimRegions}
 				clipRegions={timeline.clipRegions}
 				onClipSplit={clipCommands.handleClipSplit}
+				onRippleDeleteLeft={clipCommands.handleRippleDeleteLeft}
+				onRippleDeleteRight={clipCommands.handleRippleDeleteRight}
 				onClipSpanChange={clipCommands.handleClipSpanChange}
 				selectedClipId={timeline.selectedClipId}
 				onSelectClip={clipCommands.handleSelectClip}

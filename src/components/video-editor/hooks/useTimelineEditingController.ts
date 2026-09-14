@@ -190,6 +190,7 @@ export function useTimelineEditingController(input: Input) {
 		setActiveEffectSection: input.setActiveEffectSection,
 		nextClipIdRef: input.nextClipIdRef,
 		t: input.t,
+		handleSeek: playback.handleSeek,
 	});
 	const audioCommands = useAudioRegionCommands({
 		setAudioRegions: timeline.setAudioRegions,

@@ -1,6 +1,5 @@
 import { useTimelineContext } from "dnd-timeline";
 import { useEffect, useState, type RefObject } from "react";
-import { cn } from "@/lib/utils";
 import { formatPlayheadTime } from "../../core/time";
 
 interface PlaybackCursorProps {
@@ -94,43 +93,23 @@ export default function PlaybackCursor({
 					setIsDragging(true);
 				}}
 			>
+				{/* Sleek blue playhead handle */}
 				<div
-					className="absolute -top-1 left-1/2 -translate-x-1/2 hover:scale-125 transition-transform"
-					style={{ width: "16px", height: "16px" }}
+					className="absolute -top-2 left-1/2 -translate-x-1/2 flex flex-col items-center hover:scale-110 transition-transform cursor-ew-resize select-none"
+					style={{ width: "16px" }}
 				>
-					<div className="w-3 h-3 mx-auto mt-[2px] bg-[#2563EB] rotate-45 rounded-sm shadow-lg border border-foreground/20" />
-				</div>
-				<div
-					className={cn(
-						"absolute -top-6 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] text-white/90 font-medium tabular-nums whitespace-nowrap border border-foreground/10 shadow-lg pointer-events-none transition-opacity",
-						isDragging || isLoading ? "opacity-100" : "opacity-0",
-					)}
-				>
-					<div className="flex items-center">
-						{formatPlayheadTime(clampedTime)
-							.split("")
-							.map((char, i) => (
-								<span
-									key={i}
-									className={cn(
-										"leading-5 whitespace-pre",
-										isLoading &&
-											"bg-gradient-to-r from-white/40 via-white to-white/40 bg-clip-text text-transparent animate-text-shimmer",
-									)}
-									style={
-										isLoading
-											? {
-													animationDelay: `${i * 0.05}s`,
-													animationDuration: "2.5s",
-												}
-											: undefined
-									}
-								>
-									{char}
-								</span>
-							))}
+					<div className={`w-3.5 h-3.5 bg-[#2563EB] rounded-full shadow-[0_0_8px_rgba(37,99,235,0.8)] flex items-center justify-center ${isLoading ? "animate-pulse" : ""}`}>
+						<div className="w-1 h-1 rounded-full bg-white" />
 					</div>
+					<div className="w-0 h-0 -mt-0.5 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[4px] border-t-[#2563EB]" />
 				</div>
+
+				{/* Clean time badge - only visible while dragging or loading */}
+				{(isDragging || isLoading) && (
+					<div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-[#181a20] text-[10px] text-white font-mono font-medium tabular-nums shadow-xl border border-white/10 pointer-events-none whitespace-nowrap">
+						{isLoading ? "Loading..." : formatPlayheadTime(clampedTime)}
+					</div>
+				)}
 			</div>
 		</div>
 	);

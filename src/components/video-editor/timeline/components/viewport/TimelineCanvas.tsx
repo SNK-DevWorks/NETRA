@@ -243,7 +243,6 @@ interface TimelineHoverParams {
 
 function useTimelineHover({
 	direction,
-	sidebarWidth,
 	rangeStart,
 	rangeEnd,
 	videoDurationMs,
@@ -257,41 +256,7 @@ function useTimelineHover({
 	isDragging,
 	valueToPixels,
 }: TimelineHoverParams) {
-	const [isTimelineHovered, setIsTimelineHovered] = useState(false);
-	const [timelineHoverMs, setTimelineHoverMs] = useState<number | null>(null);
-
 	const visibleDurationMs = Math.max(1, rangeEnd - rangeStart);
-
-	const updateTimelineHoverTime = useCallback(
-		(clientX: number, rect: DOMRect) => {
-			const contentWidth = Math.max(1, rect.width - sidebarWidth);
-			const contentX =
-				direction === "rtl"
-					? rect.right - sidebarWidth - clientX
-					: clientX - rect.left - sidebarWidth;
-			const clampedX = Math.max(0, Math.min(contentX, contentWidth));
-			const ratio = clampedX / contentWidth;
-			const nextMs = rangeStart + ratio * visibleDurationMs;
-			setTimelineHoverMs(Math.max(0, Math.min(nextMs, videoDurationMs)));
-		},
-		[direction, rangeStart, sidebarWidth, videoDurationMs, visibleDurationMs],
-	);
-
-	const handleTimelineMouseEnter = useCallback(
-		(event: MouseEvent<HTMLDivElement>) => {
-			setIsTimelineHovered(true);
-			updateTimelineHoverTime(event.clientX, event.currentTarget.getBoundingClientRect());
-		},
-		[updateTimelineHoverTime],
-	);
-
-	const handleTimelineMouseMove = useCallback(
-		(event: MouseEvent<HTMLDivElement>) => {
-			if (!isTimelineHovered) setIsTimelineHovered(true);
-			updateTimelineHoverTime(event.clientX, event.currentTarget.getBoundingClientRect());
-		},
-		[isTimelineHovered, updateTimelineHoverTime],
-	);
 
 	const zoom = useTimelineLaneHover({
 		direction,
@@ -321,21 +286,11 @@ function useTimelineHover({
 	});
 
 	const handleTimelineMouseLeave = useCallback(() => {
-		setIsTimelineHovered(false);
-		setTimelineHoverMs(null);
 		zoom.reset();
 		caption.reset();
 	}, [zoom.reset, caption.reset]);
 
-	const timelineGhostOffsetPx =
-		timelineHoverMs === null ? 0 : valueToPixels(Math.max(0, timelineHoverMs - rangeStart));
-	const canShowGhostPlayhead = isTimelineHovered && timelineHoverMs !== null;
-
 	return {
-		canShowGhostPlayhead,
-		timelineGhostOffsetPx,
-		handleTimelineMouseEnter,
-		handleTimelineMouseMove,
 		handleTimelineMouseLeave,
 		canShowGhostZoom: zoom.canShowGhost,
 		ghostStartMs: zoom.ghostStartMs,
@@ -947,12 +902,7 @@ export default function TimelineCanvas({
 	const timelineRowsMinHeightPx = getTimelineRowsMinHeightPx(timelineRowCount);
 	const timelineContentMinHeightPx = getTimelineContentMinHeightPx(timelineRowCount);
 	const timelineViewportStretchFactor = getTimelineViewportStretchFactor(timelineRowCount);
-	const sideProperty = direction === "rtl" ? "right" : "left";
 	const {
-		canShowGhostPlayhead,
-		timelineGhostOffsetPx,
-		handleTimelineMouseEnter,
-		handleTimelineMouseMove,
 		handleTimelineMouseLeave,
 		canShowGhostZoom,
 		ghostStartMs,
@@ -999,8 +949,6 @@ export default function TimelineCanvas({
 			className="select-none bg-editor-bg relative cursor-pointer group flex flex-col"
 			onMouseDown={handleTimelineMouseDown}
 			onClick={handleTimelineClick}
-			onMouseEnter={handleTimelineMouseEnter}
-			onMouseMove={handleTimelineMouseMove}
 			onMouseLeave={handleTimelineMouseLeave}
 		>
 			<TimelineAxis videoDurationMs={videoDurationMs} currentTimeMs={currentTimeMs} />
@@ -1012,20 +960,6 @@ export default function TimelineCanvas({
 				keyframes={keyframes}
 				isLoading={isLoading}
 			/>
-			{canShowGhostPlayhead && (
-				<div
-					className="absolute top-0 bottom-0 z-[45] pointer-events-none"
-					style={{
-						[sideProperty === "right" ? "marginRight" : "marginLeft"]:
-							`${sidebarWidth - 1}px`,
-					}}
-				>
-					<div
-						className="absolute top-0 bottom-0 w-px bg-foreground/35"
-						style={{ [sideProperty]: `${timelineGhostOffsetPx}px` }}
-					/>
-				</div>
-			)}
 
 			<div
 				className="relative z-10 flex flex-1 min-h-0 flex-col"

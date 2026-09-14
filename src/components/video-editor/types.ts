@@ -424,7 +424,7 @@ export function trimsToClips(trims: TrimRegion[], totalDurationMs: number): Clip
 	return clips;
 }
 
-export type AnnotationType = "text" | "image" | "figure" | "blur";
+export type AnnotationType = "text" | "image" | "video" | "figure" | "blur";
 export const BLUR_ANNOTATION_STRENGTH = 20;
 export const BASE_PREVIEW_WIDTH = 1920;
 export const BASE_PREVIEW_HEIGHT = 1080;
@@ -483,6 +483,7 @@ export interface AnnotationRegion {
 	content: string; // Legacy - still used for current type
 	textContent?: string; // Separate storage for text
 	imageContent?: string; // Separate storage for image data URL
+	videoContent?: string; // URL for video overlay playback
 	position: AnnotationPosition;
 	size: AnnotationSize;
 	style: AnnotationTextStyle;

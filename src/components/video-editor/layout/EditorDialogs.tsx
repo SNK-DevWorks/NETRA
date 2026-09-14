@@ -136,10 +136,10 @@ export function EditorDialogs({
 			>
 				<DialogContent className="max-w-[270px] border-none bg-transparent p-0 shadow-none overflow-visible [&>button:last-child]:hidden">
 					<div className="flex w-full flex-col select-none">
-						{/* Top Apple Confirmation Card */}
-						<div className="overflow-hidden rounded-[14px] border border-black/[0.08] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.38)] dark:border-black/[0.08] dark:bg-white">
+						{/* Top Confirmation Card */}
+						<div className="overflow-hidden rounded-[14px] border border-black/[0.08] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.38)] dark:border-white/[0.12] dark:bg-[#1e1e20] dark:shadow-[0_20px_50px_rgba(0,0,0,0.75)]">
 							<div className="px-4 py-3.5 text-center">
-								<DialogTitle className="text-[13px] font-semibold text-[#8e8e93] tracking-normal leading-tight dark:text-[#8e8e93]">
+								<DialogTitle className="text-[13px] font-semibold text-[#8e8e93] tracking-normal leading-tight dark:text-[#a1a1a6]">
 									{unsavedChangesDialogActionLabel === "close the editor" || !unsavedChangesDialogActionLabel
 										? t("editor.project.unsavedChangesHeading", "Save changes before closing?")
 										: t("editor.project.unsavedChangesHeading", "Save changes?")}
@@ -148,30 +148,30 @@ export function EditorDialogs({
 									{t("editor.project.unsavedChangesTitle", "Unsaved changes")}
 								</DialogDescription>
 							</div>
-							<div className="h-[0.5px] bg-[#3c3c43]/[0.18] dark:bg-[#3c3c43]/[0.18]" />
+							<div className="h-[0.5px] bg-[#3c3c43]/[0.18] dark:bg-white/[0.1]" />
 							<button
 								type="button"
 								onClick={() => resolveUnsavedChangesDialog("save")}
-								className="flex h-11 w-full items-center justify-center text-[17px] font-normal text-[#007AFF] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] focus:outline-none"
+								className="flex h-11 w-full items-center justify-center text-[17px] font-normal text-[#007AFF] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] dark:text-[#0A84FF] dark:hover:bg-white/[0.06] dark:active:bg-white/[0.1] focus:outline-none"
 							>
 								{t("editor.project.save", "Save")}
 							</button>
-							<div className="h-[0.5px] bg-[#3c3c43]/[0.18] dark:bg-[#3c3c43]/[0.18]" />
+							<div className="h-[0.5px] bg-[#3c3c43]/[0.18] dark:bg-white/[0.1]" />
 							<button
 								type="button"
 								onClick={() => resolveUnsavedChangesDialog("discard")}
-								className="flex h-11 w-full items-center justify-center text-[17px] font-normal text-[#FF3B30] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] focus:outline-none"
+								className="flex h-11 w-full items-center justify-center text-[17px] font-normal text-[#FF3B30] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] dark:text-[#FF453A] dark:hover:bg-white/[0.06] dark:active:bg-white/[0.1] focus:outline-none"
 							>
 								{t("editor.project.dontSave", "Don't Save")}
 							</button>
 						</div>
 
 						{/* Separate Bottom Cancel Card */}
-						<div className="mt-2 overflow-hidden rounded-[14px] border border-black/[0.08] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.38)] dark:border-black/[0.08] dark:bg-white">
+						<div className="mt-2 overflow-hidden rounded-[14px] border border-black/[0.08] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.38)] dark:border-white/[0.12] dark:bg-[#1e1e20] dark:shadow-[0_20px_50px_rgba(0,0,0,0.75)]">
 							<button
 								type="button"
 								onClick={() => resolveUnsavedChangesDialog("cancel")}
-								className="flex h-11 w-full items-center justify-center text-[17px] font-semibold text-[#007AFF] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] focus:outline-none"
+								className="flex h-11 w-full items-center justify-center text-[17px] font-semibold text-[#007AFF] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] dark:text-[#0A84FF] dark:hover:bg-white/[0.06] dark:active:bg-white/[0.1] focus:outline-none"
 							>
 								{t("common.actions.cancel", "Cancel")}
 							</button>

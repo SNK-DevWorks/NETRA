@@ -1,5 +1,5 @@
 import type { Span } from "dnd-timeline";
-import { type Dispatch, type MutableRefObject, type SetStateAction, useCallback } from "react";
+import { type Dispatch, type MutableRefObject, type SetStateAction, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { planClipSpeedChange } from "../clipSpeedChange";
 import { planClipSplit } from "../clipSplit";
@@ -36,6 +36,7 @@ interface UseClipRegionCommandsParams {
 	setActiveEffectSection: Dispatch<SetStateAction<EditorEffectSection>>;
 	nextClipIdRef: MutableRefObject<number>;
 	t: Translator;
+	handleSeek?: (seconds: number) => void;
 }
 
 export function useClipRegionCommands({
@@ -55,6 +56,7 @@ export function useClipRegionCommands({
 	setActiveEffectSection,
 	nextClipIdRef,
 	t,
+	handleSeek,
 }: UseClipRegionCommandsParams) {
 	const handleSelectClip = useCallback(
 		(id: string | null) => {
@@ -92,9 +94,9 @@ export function useClipRegionCommands({
 					clip.id === plan.targetId ? [plan.left, plan.right] : [clip],
 				),
 			);
-			if (selectedClipId === plan.targetId) setSelectedClipId(plan.left.id);
+			setSelectedClipId(plan.right.id);
 		},
-		[clipRegions, nextClipIdRef, selectedClipId, setClipRegions, setSelectedClipId],
+		[clipRegions, nextClipIdRef, setClipRegions, setSelectedClipId],
 	);
 
 	const handleClipSpanChange = useCallback(
@@ -247,6 +249,259 @@ export function useClipRegionCommands({
 		],
 	);
 
+	const handleRippleDeleteLeft = useCallback(
+		(currentMs: number) => {
+			const splitAt = Math.round(currentMs);
+			const targetClip =
+				(selectedClipId
+					? clipRegions.find(
+							(c) => c.id === selectedClipId && splitAt > c.startMs && splitAt < c.endMs,
+						)
+					: null) ??
+				clipRegions.find((c) => splitAt > c.startMs && splitAt < c.endMs);
+
+			if (!targetClip) return;
+
+			const deleteStart = targetClip.startMs;
+			const deleteEnd = splitAt;
+			const delta = deleteEnd - deleteStart;
+			if (delta <= 0) return;
+
+			const speed = Number.isFinite(targetClip.speed) && targetClip.speed > 0 ? targetClip.speed : 1;
+			const newSourceStartMs = Math.max(0, Math.round((targetClip.sourceStartMs ?? 0) + delta * speed));
+
+			// 1. Ripple video clips
+			setClipRegions((current) =>
+				current
+					.map((c) => {
+						if (c.id === targetClip.id) {
+							return {
+								...c,
+								startMs: deleteStart,
+								endMs: c.endMs - delta,
+								sourceStartMs: newSourceStartMs,
+							};
+						}
+						if (c.startMs >= targetClip.endMs) {
+							return {
+								...c,
+								startMs: c.startMs - delta,
+								endMs: c.endMs - delta,
+							};
+						}
+						return c;
+					})
+					.filter((c) => c.endMs > c.startMs),
+			);
+
+			// 2. Ripple other timeline regions (zooms, annotations, captions, audio, speed)
+			const rippleRegions = <T extends { startMs: number; endMs: number }>(regions: T[]): T[] => {
+				return regions
+					.filter((r) => !(r.startMs >= deleteStart && r.endMs <= deleteEnd))
+					.map((r) => {
+						if (r.startMs < deleteStart && r.endMs > deleteStart && r.endMs <= deleteEnd) {
+							return { ...r, endMs: deleteStart };
+						}
+						if (r.startMs >= deleteStart && r.startMs < deleteEnd && r.endMs > deleteEnd) {
+							return { ...r, startMs: deleteStart, endMs: r.endMs - delta };
+						}
+						if (r.startMs < deleteStart && r.endMs > deleteEnd) {
+							return { ...r, endMs: r.endMs - delta };
+						}
+						if (r.startMs >= deleteEnd) {
+							return { ...r, startMs: r.startMs - delta, endMs: r.endMs - delta };
+						}
+						return r;
+					})
+					.filter((r) => r.endMs > r.startMs);
+			};
+
+			setZoomRegions((current) => rippleRegions(current));
+			setAnnotationRegions((current) => rippleRegions(current));
+			setSpeedRegions((current) => rippleRegions(current));
+			setAudioRegions((current) => rippleRegions(current));
+
+			// 3. Move playhead to the cut point
+			handleSeek?.(deleteStart / 1000);
+			setSelectedClipId(targetClip.id);
+		},
+		[
+			clipRegions,
+			handleSeek,
+			selectedClipId,
+			setAnnotationRegions,
+			setAudioRegions,
+			setClipRegions,
+			setSelectedClipId,
+			setSpeedRegions,
+			setZoomRegions,
+		],
+	);
+
+	const handleRippleDeleteRight = useCallback(
+		(currentMs: number) => {
+			const splitAt = Math.round(currentMs);
+			const targetClip =
+				(selectedClipId
+					? clipRegions.find(
+							(c) => c.id === selectedClipId && splitAt > c.startMs && splitAt < c.endMs,
+						)
+					: null) ??
+				clipRegions.find((c) => splitAt > c.startMs && splitAt < c.endMs);
+
+			if (!targetClip) return;
+
+			const deleteStart = splitAt;
+			const deleteEnd = targetClip.endMs;
+			const delta = deleteEnd - deleteStart;
+			if (delta <= 0) return;
+
+			// 1. Ripple video clips
+			setClipRegions((current) =>
+				current
+					.map((c) => {
+						if (c.id === targetClip.id) {
+							return {
+								...c,
+								endMs: splitAt,
+							};
+						}
+						if (c.startMs >= targetClip.endMs) {
+							return {
+								...c,
+								startMs: c.startMs - delta,
+								endMs: c.endMs - delta,
+							};
+						}
+						return c;
+					})
+					.filter((c) => c.endMs > c.startMs),
+			);
+
+			// 2. Ripple other timeline regions
+			const rippleRegions = <T extends { startMs: number; endMs: number }>(regions: T[]): T[] => {
+				return regions
+					.filter((r) => !(r.startMs >= deleteStart && r.endMs <= deleteEnd))
+					.map((r) => {
+						if (r.startMs < deleteStart && r.endMs > deleteStart && r.endMs <= deleteEnd) {
+							return { ...r, endMs: deleteStart };
+						}
+						if (r.startMs >= deleteStart && r.startMs < deleteEnd && r.endMs > deleteEnd) {
+							return { ...r, startMs: deleteStart, endMs: r.endMs - delta };
+						}
+						if (r.startMs < deleteStart && r.endMs > deleteEnd) {
+							return { ...r, endMs: r.endMs - delta };
+						}
+						if (r.startMs >= deleteEnd) {
+							return { ...r, startMs: r.startMs - delta, endMs: r.endMs - delta };
+						}
+						return r;
+					})
+					.filter((r) => r.endMs > r.startMs);
+			};
+
+			setZoomRegions((current) => rippleRegions(current));
+			setAnnotationRegions((current) => rippleRegions(current));
+			setSpeedRegions((current) => rippleRegions(current));
+			setAudioRegions((current) => rippleRegions(current));
+
+			setSelectedClipId(targetClip.id);
+		},
+		[
+			clipRegions,
+			selectedClipId,
+			setAnnotationRegions,
+			setAudioRegions,
+			setClipRegions,
+			setSelectedClipId,
+			setSpeedRegions,
+			setZoomRegions,
+		],
+	);
+
+	const clipClipboardRef = useRef<Omit<ClipRegion, "id"> | null>(null);
+
+	const handleClipCopy = useCallback(
+		(targetClipId?: string | null) => {
+			const id = targetClipId ?? selectedClipId;
+			const target = clipRegions.find((c) => c.id === id);
+			if (!target) {
+				toast.error(t("editor.clipboard.noSelection", "No clip selected to copy"));
+				return;
+			}
+			const { id: _id, ...clipData } = target;
+			clipClipboardRef.current = clipData;
+			toast.success(t("editor.clipboard.copied", "Clip copied to clipboard"));
+		},
+		[clipRegions, selectedClipId, t],
+	);
+
+	const handleClipPaste = useCallback(
+		(pasteAtMs?: number) => {
+			const clipData = clipClipboardRef.current;
+			if (!clipData) {
+				toast.error(t("editor.clipboard.empty", "Clipboard is empty"));
+				return;
+			}
+			const targetStartMs = pasteAtMs ?? 0;
+			const durationMs = clipData.endMs - clipData.startMs;
+			const newId = `clip-${nextClipIdRef.current++}`;
+
+			const newClip: ClipRegion = {
+				...clipData,
+				id: newId,
+				startMs: targetStartMs,
+				endMs: targetStartMs + durationMs,
+			};
+
+			setClipRegions((current) => {
+				const updated = current.map((c) => {
+					if (c.startMs >= targetStartMs) {
+						return { ...c, startMs: c.startMs + durationMs, endMs: c.endMs + durationMs };
+					}
+					return c;
+				});
+				return [...updated, newClip].sort((a, b) => a.startMs - b.startMs);
+			});
+
+			setSelectedClipId(newId);
+			toast.success(t("editor.clipboard.pasted", "Clip pasted"));
+		},
+		[nextClipIdRef, setClipRegions, setSelectedClipId, t],
+	);
+
+	const handleClipDuplicate = useCallback(
+		(targetClipId?: string | null) => {
+			const id = targetClipId ?? selectedClipId;
+			const target = clipRegions.find((c) => c.id === id);
+			if (!target) return;
+
+			const durationMs = target.endMs - target.startMs;
+			const newId = `clip-${nextClipIdRef.current++}`;
+			const newClip: ClipRegion = {
+				...target,
+				id: newId,
+				startMs: target.endMs,
+				endMs: target.endMs + durationMs,
+			};
+
+			setClipRegions((current) => {
+				const updated = current.map((c) => {
+					if (c.id === target.id) return c;
+					if (c.startMs >= target.endMs) {
+						return { ...c, startMs: c.startMs + durationMs, endMs: c.endMs + durationMs };
+					}
+					return c;
+				});
+				return [...updated, newClip].sort((a, b) => a.startMs - b.startMs);
+			});
+
+			setSelectedClipId(newId);
+			toast.success(t("editor.clipboard.duplicated", "Clip duplicated"));
+		},
+		[clipRegions, nextClipIdRef, selectedClipId, setClipRegions, setSelectedClipId, t],
+	);
+
 	return {
 		handleSelectClip,
 		handleClipSplit,
@@ -255,5 +510,10 @@ export function useClipRegionCommands({
 		handleClipMutedChange,
 		handleClipShowSourceAudioChange,
 		handleClipDelete,
+		handleRippleDeleteLeft,
+		handleRippleDeleteRight,
+		handleClipCopy,
+		handleClipPaste,
+		handleClipDuplicate,
 	};
 }

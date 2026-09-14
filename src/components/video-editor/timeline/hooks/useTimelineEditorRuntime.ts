@@ -43,6 +43,8 @@ interface UseTimelineEditorRuntimeParams {
 	onTrimSpanChange?: (id: string, span: Span) => void;
 	clipRegions: ClipRegion[];
 	onClipSplit?: (splitMs: number) => void;
+	onRippleDeleteLeft?: (splitMs: number) => void;
+	onRippleDeleteRight?: (splitMs: number) => void;
 	onClipSpanChange?: (id: string, span: Span) => void;
 	onClipDelete?: (id: string) => void;
 	selectedClipId?: string | null;
@@ -93,6 +95,8 @@ export function useTimelineEditorRuntime({
 	onTrimSpanChange,
 	clipRegions,
 	onClipSplit,
+	onRippleDeleteLeft,
+	onRippleDeleteRight,
 	onClipSpanChange,
 	onClipDelete,
 	selectedClipId,
@@ -235,6 +239,20 @@ export function useTimelineEditorRuntime({
 		onClipSplit(currentTimeMs);
 	}, [videoDuration, totalMs, currentTimeMs, onClipSplit]);
 
+	const handleRippleDeleteLeft = useCallback(() => {
+		if (!videoDuration || videoDuration === 0 || totalMs === 0 || !onRippleDeleteLeft) {
+			return;
+		}
+		onRippleDeleteLeft(currentTimeMs);
+	}, [videoDuration, totalMs, currentTimeMs, onRippleDeleteLeft]);
+
+	const handleRippleDeleteRight = useCallback(() => {
+		if (!videoDuration || videoDuration === 0 || totalMs === 0 || !onRippleDeleteRight) {
+			return;
+		}
+		onRippleDeleteRight(currentTimeMs);
+	}, [videoDuration, totalMs, currentTimeMs, onRippleDeleteRight]);
+
 	const { handleAddAudio } = useTimelineAudioActions({
 		timeline: { videoDuration, totalMs, currentTimeMs },
 		regions: { audio: audioRegions },
@@ -277,6 +295,8 @@ export function useTimelineEditorRuntime({
 		addKeyframe,
 		handleAddZoom,
 		handleSplitClip,
+		handleRippleDeleteLeft,
+		handleRippleDeleteRight,
 		handleAddAnnotation: () => handleAddAnnotation(),
 		deleteSelectedKeyframe,
 		deleteSelectedZoom,
@@ -293,6 +313,8 @@ export function useTimelineEditorRuntime({
 			addZoom: handleAddZoom,
 			suggestZooms: handleSuggestZooms,
 			splitClip: handleSplitClip,
+			rippleDeleteLeft: handleRippleDeleteLeft,
+			rippleDeleteRight: handleRippleDeleteRight,
 			addAnnotation: handleAddAnnotation,
 			addAudio: handleAddAudio,
 			keyframes,
@@ -303,6 +325,8 @@ export function useTimelineEditorRuntime({
 			handleAddZoom,
 			handleSuggestZooms,
 			handleSplitClip,
+			handleRippleDeleteLeft,
+			handleRippleDeleteRight,
 			keyframes,
 		],
 	);

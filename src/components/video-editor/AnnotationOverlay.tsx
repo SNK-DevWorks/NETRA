@@ -148,13 +148,14 @@ export function AnnotationOverlay({
 					</div>
 				);
 
-			case "image":
-				if (annotation.content && annotation.content.startsWith("data:image")) {
+			case "image": {
+				const src = annotation.imageContent || annotation.content;
+				if (src && (src.startsWith("data:") || src.startsWith("http") || src.startsWith("file") || src.startsWith("blob"))) {
 					return (
 						<img
-							src={annotation.content}
-							alt="Annotation"
-							className="w-full h-full object-contain"
+							src={src}
+							alt="Overlay"
+							className="w-full h-full object-contain pointer-events-none select-none"
 							draggable={false}
 						/>
 					);
@@ -164,6 +165,28 @@ export function AnnotationOverlay({
 						No image
 					</div>
 				);
+			}
+
+			case "video": {
+				const src = annotation.videoContent || annotation.content;
+				if (src) {
+					return (
+						<video
+							src={src}
+							autoPlay
+							loop
+							muted
+							playsInline
+							className="w-full h-full object-contain pointer-events-none select-none rounded"
+						/>
+					);
+				}
+				return (
+					<div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+						No video
+					</div>
+				);
+			}
 
 			case "figure":
 				if (!annotation.figureData) {
@@ -299,6 +322,7 @@ export function AnnotationOverlay({
 					"w-full h-full rounded-lg",
 					annotation.type === "text" && "bg-transparent",
 					annotation.type === "image" && "bg-transparent",
+					annotation.type === "video" && "bg-transparent",
 					annotation.type === "figure" && "bg-transparent",
 					isSelected && "shadow-lg",
 				)}

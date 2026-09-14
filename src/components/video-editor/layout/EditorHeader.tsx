@@ -1,8 +1,8 @@
 import {
-	FolderOpen,
 	ArrowClockwise as Redo2,
 	ArrowCounterClockwise as Undo2,
 } from "@phosphor-icons/react";
+import netraLogo from "@/assets/netra-logo.png";
 import type { CSSProperties, FormEvent, RefObject } from "react";
 import { Button } from "@/components/ui/button";
 import type { useI18n } from "@/contexts/I18nContext";
@@ -94,59 +94,37 @@ export function EditorHeader(props: Props) {
 
 	return (
 		<div
-			className={`relative z-50 flex h-11 flex-shrink-0 items-center justify-between border-b border-foreground/10 bg-editor-header/88 pl-6 backdrop-blur-md ${headerRightControlsPaddingClass || "pr-5"}`}
+			className={`relative z-50 flex h-11 flex-shrink-0 items-center justify-between border-b border-foreground/10 bg-editor-header/88 pl-4 backdrop-blur-md ${headerRightControlsPaddingClass || "pr-4"}`}
 			style={{ WebkitAppRegion: "drag" } as CSSProperties}
 		>
+			{/* Left: Open projects + Project Name */}
 			<div
-				className={`flex items-center justify-self-start gap-1.5 ${headerLeftControlsPaddingClass}`}
+				className={`flex items-center justify-self-start gap-2 ${headerLeftControlsPaddingClass}`}
 				style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
 			>
 				<button
 					ref={projectBrowserTriggerRef}
 					type="button"
 					onClick={handleOpenProjectBrowser}
-					className="group relative flex h-9 w-9 items-center justify-center rounded-lg p-0 text-muted-foreground outline-none transition-colors hover:bg-foreground/10 hover:text-foreground focus:outline-none"
+					className="group relative flex h-8 w-8 items-center justify-center rounded-lg outline-none transition-transform hover:scale-105 active:scale-95 focus:outline-none"
 					title={t("editor.project.projects", "Open projects")}
 					aria-label={t("editor.project.projects", "Open projects")}
 				>
-					<FolderOpen className="h-[27px] w-[27px]" />
+					<img
+						src={netraLogo}
+						alt="Netra"
+						className="h-6 w-6 rounded-md object-contain select-none"
+						draggable={false}
+					/>
 				</button>
-				<div className="mx-1 h-5 w-px bg-foreground/10" />
-				<Button
-					type="button"
-					variant="ghost"
-					onClick={handleUndo}
-					disabled={!canUndo}
-					className="inline-flex h-8 w-8 items-center justify-center rounded-[5px] border border-foreground/10 bg-foreground/5 p-0 text-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-					title={t("common.actions.undo", "Undo")}
-					aria-label={t("common.actions.undo", "Undo")}
-				>
-					<Undo2 className="h-4 w-4" />
-				</Button>
-				<Button
-					type="button"
-					variant="ghost"
-					onClick={handleRedo}
-					disabled={!canRedo}
-					className="inline-flex h-8 w-8 items-center justify-center rounded-[5px] border border-foreground/10 bg-foreground/5 p-0 text-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-					title={t("common.actions.redo", "Redo")}
-					aria-label={t("common.actions.redo", "Redo")}
-				>
-					<Redo2 className="h-4 w-4" />
-				</Button>
-			</div>
 
-			<div
-				className="absolute left-1/2 flex min-w-0 -translate-x-1/2 items-center justify-center"
-				style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
-			>
 				{isEditingProjectName ? (
 					<form
 						onSubmit={(event) => void handleProjectNameSubmit(event)}
-						className="flex max-w-[min(52vw,460px)] items-baseline gap-1 rounded-[7px] border border-foreground/10 bg-editor-panel/[0.88] px-2.5 py-1 shadow-[0_10px_28px_rgba(0,0,0,0.18)]"
+						className="flex max-w-[260px] items-baseline gap-1 rounded-md border border-foreground/15 bg-editor-panel/90 px-2 py-0.5 shadow-sm"
 					>
 						{hasUnsavedChanges ? (
-							<span className="mt-[1px] size-2 shrink-0 rounded-full bg-[#2563EB]" />
+							<span className="mt-[1px] size-1.5 shrink-0 rounded-full bg-[#2563EB]" />
 						) : null}
 						<input
 							ref={projectNameInputRef}
@@ -163,11 +141,11 @@ export function EditorHeader(props: Props) {
 								}
 							}}
 							disabled={isSavingProjectName}
-							className="min-w-[10ch] max-w-[min(40vw,360px)] bg-transparent text-sm font-semibold tracking-tight text-foreground/95 outline-none placeholder:text-muted-foreground/60 disabled:cursor-wait"
-							style={{ width: `${Math.max(projectNameDraft.length, 10)}ch` }}
+							className="min-w-[8ch] max-w-[200px] bg-transparent text-xs font-semibold tracking-tight text-foreground/95 outline-none placeholder:text-muted-foreground/60 disabled:cursor-wait"
+							style={{ width: `${Math.max(projectNameDraft.length, 8)}ch` }}
 							aria-label={t("editor.project.renameInput", "Project name")}
 						/>
-						<span className="shrink-0 text-xs font-medium tracking-tight text-muted-foreground/70">
+						<span className="shrink-0 text-[10px] font-medium tracking-tight text-muted-foreground/60">
 							.netra
 						</span>
 					</form>
@@ -175,32 +153,58 @@ export function EditorHeader(props: Props) {
 					<button
 						type="button"
 						onClick={() => setIsEditingProjectName(true)}
-						className="inline-flex max-w-[min(52vw,460px)] items-baseline gap-1 rounded-[7px] px-2.5 py-1 transition-colors hover:bg-foreground/5"
+						className="inline-flex max-w-[260px] items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-foreground/5"
 						title={t("editor.project.renameTitle", "Rename project")}
 						aria-label={t("editor.project.renameTitle", "Rename project")}
 					>
 						{hasUnsavedChanges ? (
-							<span className="mt-[1px] size-2 shrink-0 rounded-full bg-[#2563EB]" />
+							<span className="size-1.5 shrink-0 rounded-full bg-[#2563EB]" />
 						) : null}
-						<span className="truncate text-sm font-semibold tracking-tight text-foreground/90">
+						<span className="truncate text-xs font-semibold tracking-tight text-foreground/90">
 							{projectDisplayName}
 						</span>
-						<span className="shrink-0 text-xs font-medium tracking-tight text-muted-foreground/70">
+						<span className="shrink-0 text-[10px] font-medium tracking-tight text-muted-foreground/50">
 							.netra
 						</span>
 					</button>
 				)}
 			</div>
 
+			{/* Center: Undo & Redo (OpenCut style) */}
 			<div
-				className="flex items-center justify-self-end"
+				className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1"
+				style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
+			>
+				<Button
+					type="button"
+					variant="ghost"
+					onClick={handleUndo}
+					disabled={!canUndo}
+					className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-foreground/10 bg-foreground/5 p-0 text-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+					title={t("common.actions.undo", "Undo")}
+					aria-label={t("common.actions.undo", "Undo")}
+				>
+					<Undo2 className="h-3.5 w-3.5" />
+				</Button>
+				<Button
+					type="button"
+					variant="ghost"
+					onClick={handleRedo}
+					disabled={!canRedo}
+					className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-foreground/10 bg-foreground/5 p-0 text-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+					title={t("common.actions.redo", "Redo")}
+					aria-label={t("common.actions.redo", "Redo")}
+				>
+					<Redo2 className="h-3.5 w-3.5" />
+				</Button>
+			</div>
+
+			{/* Right: Presets + Export Button */}
+			<div
+				className="flex items-center gap-1.5 justify-self-end"
 				style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
 			>
 				<EditorPresetMenu t={t} presets={presets} />
-				<div
-					aria-hidden="true"
-					className="mx-2 h-4 w-px shrink-0 bg-foreground/10 opacity-0"
-				/>
 				<EditorExportMenu
 					t={t}
 					exportSettings={exportSettings}
