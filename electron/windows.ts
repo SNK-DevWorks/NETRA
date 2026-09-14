@@ -950,11 +950,20 @@ export function createEditorWindow(): BrowserWindow {
 		...(process.platform !== "darwin" && {
 			icon: WINDOW_ICON_PATH,
 		}),
-		...(isMac && {
-			titleBarStyle: "hiddenInset",
-			trafficLightPosition: { x: 12, y: 12 },
-		}),
-		autoHideMenuBar: !isMac,
+		...(isMac
+			? {
+					titleBarStyle: "hiddenInset",
+					trafficLightPosition: { x: 12, y: 12 },
+				}
+			: {
+					titleBarStyle: "hidden",
+					titleBarOverlay: {
+						color: "#00000000",
+						symbolColor: "#8e8e93",
+						height: 44,
+					},
+				}),
+		autoHideMenuBar: true,
 		transparent: false,
 		resizable: true,
 		alwaysOnTop: false,

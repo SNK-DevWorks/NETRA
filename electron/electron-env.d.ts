@@ -891,6 +891,9 @@ interface Window {
 		setAppSetting: (key: string, value: unknown) => boolean;
 		setHasUnsavedChanges: (hasChanges: boolean) => void;
 		onRequestSaveBeforeClose: (callback: () => Promise<boolean>) => () => void;
+		onRequestCloseWithUnsavedChanges?: (callback: () => void) => () => void;
+		confirmCloseEditor?: (action: "save" | "discard" | "cancel") => void;
+		setTitleBarOverlay?: (options: { color?: string; symbolColor?: string; height?: number }) => Promise<boolean>;
 		isNativeWindowsCaptureAvailable: () => Promise<{ available: boolean }>;
 		muxNativeWindowsRecording: (expectedDurationMs?: number) => Promise<{
 			success: boolean;

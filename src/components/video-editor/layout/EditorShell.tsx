@@ -36,6 +36,7 @@ type Props = {
 	exportDimensions: ReturnType<typeof useExportDimensions>;
 	settingsPanelProps: ComponentProps<typeof SettingsPanel>;
 	headerLeftControlsPaddingClass: string;
+	headerRightControlsPaddingClass: string;
 	hasCaptionsForSidecar: boolean;
 	nvidiaCudaExportAvailable: boolean;
 	experimentalNvidiaCudaExport: boolean;
@@ -60,6 +61,7 @@ export function EditorShell(props: Props) {
 		exportDimensions,
 		settingsPanelProps,
 		headerLeftControlsPaddingClass,
+		headerRightControlsPaddingClass,
 		hasCaptionsForSidecar,
 		nvidiaCudaExportAvailable,
 		experimentalNvidiaCudaExport,
@@ -149,6 +151,7 @@ export function EditorShell(props: Props) {
 			<EditorHeader
 				t={t}
 				headerLeftControlsPaddingClass={headerLeftControlsPaddingClass}
+				headerRightControlsPaddingClass={headerRightControlsPaddingClass}
 				project={project}
 				projectBrowserTriggerRef={ui.projectBrowserTriggerRef}
 				projectNameInputRef={ui.projectNameInputRef}

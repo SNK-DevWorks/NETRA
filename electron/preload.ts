@@ -1000,6 +1000,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		ipcRenderer.on("request-save-before-close", listener);
 		return () => ipcRenderer.removeListener("request-save-before-close", listener);
 	},
+	onRequestCloseWithUnsavedChanges: (callback: () => void) => {
+		const listener = () => callback();
+		ipcRenderer.on("request-close-with-unsaved-changes", listener);
+		return () => ipcRenderer.removeListener("request-close-with-unsaved-changes", listener);
+	},
+	confirmCloseEditor: (action: "save" | "discard" | "cancel") => {
+		ipcRenderer.send("confirm-close-editor", action);
+	},
+	setTitleBarOverlay: (options: { color?: string; symbolColor?: string; height?: number }) =>
+		ipcRenderer.invoke("set-title-bar-overlay", options),
 	isNativeWindowsCaptureAvailable: () =>
 		ipcRenderer.invoke("is-native-windows-capture-available"),
 	muxNativeWindowsRecording: (expectedDurationMs?: number) =>

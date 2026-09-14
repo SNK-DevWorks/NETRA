@@ -114,8 +114,13 @@
 	"project": {
 		"untitled": "Untitled",
 		"unsavedChangesTitle": "Unsaved changes",
+		"unsavedChangesHeading": "Save changes before closing?",
+		"unsavedChangesCloseTitle": "Do you want to save the changes before closing?",
 		"unsavedChangesDescription": "Save your current project before you {{action}}?",
+		"unsavedChangesDescriptionApple": "Your changes will be lost if you don't save them.",
 		"discardChanges": "Discard changes",
+		"dontSave": "Don't Save",
+		"save": "Save",
 		"saveProject": "Save project"
 	},
 	"exportTips": {

@@ -93,6 +93,7 @@ export default function VideoEditor() {
 	} = ui;
 	const effectiveShowCursor = sessionShowCursorOverride ?? showCursor;
 	const headerLeftControlsPaddingClass = appPlatform === "darwin" ? "pl-[76px]" : "";
+	const headerRightControlsPaddingClass = appPlatform === "win32" ? "pr-[140px]" : "pr-5";
 	const { cursorTelemetrySourcePath, autoCaptions, autoCaptionSettings } = timeline;
 	const exportSettings = useExportSettings(initialEditorPreferences, autoCaptions);
 	const {
@@ -377,6 +378,7 @@ export default function VideoEditor() {
 			exportDimensions={exportDimensions}
 			settingsPanelProps={settingsPanelProps}
 			headerLeftControlsPaddingClass={headerLeftControlsPaddingClass}
+			headerRightControlsPaddingClass={headerRightControlsPaddingClass}
 			hasCaptionsForSidecar={hasCaptionsForSidecar}
 			nvidiaCudaExportAvailable={nvidiaCudaExportAvailable}
 			experimentalNvidiaCudaExport={experimentalNvidiaCudaExport}

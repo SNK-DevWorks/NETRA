@@ -5,7 +5,6 @@ import {
 	app,
 	BrowserWindow,
 	desktopCapturer,
-	dialog,
 	webContents as electronWebContents,
 	ipcMain,
 	Menu,
@@ -308,6 +307,36 @@ function showHudOverlayFromTray() {
 
 ipcMain.on("set-has-unsaved-changes", (_event, hasChanges: boolean) => {
 	editorHasUnsavedChanges = hasChanges;
+});
+
+ipcMain.handle("set-title-bar-overlay", (event, options: { color?: string; symbolColor?: string; height?: number }) => {
+	const targetWindow = BrowserWindow.fromWebContents(event.sender);
+	if (!targetWindow || !isEditorWindow(targetWindow) || process.platform !== "win32") return false;
+	try {
+		targetWindow.setTitleBarOverlay(options);
+		return true;
+	} catch (err) {
+		console.error("[main] setTitleBarOverlay error:", err);
+		return false;
+	}
+});
+
+ipcMain.on("confirm-close-editor", (event, action: "save" | "discard" | "cancel") => {
+	const targetWindow = BrowserWindow.fromWebContents(event.sender);
+	if (!targetWindow || !isEditorWindow(targetWindow)) return;
+
+	if (action === "cancel") {
+		isAppQuitting = false;
+		return;
+	}
+
+	if (action === "discard" || action === "save") {
+		if (process.platform === "win32" && !isAppQuitting) {
+			closeEditorWindowToHud(targetWindow);
+		} else {
+			closeEditorWindowBypassingUnsavedPrompt(targetWindow);
+		}
+	}
 });
 
 function createWindow() {
@@ -820,38 +849,8 @@ function createEditorWindowWrapper() {
 
 		event.preventDefault();
 
-		const choice = dialog.showMessageBoxSync(editorWindow, {
-			type: "warning",
-			buttons: ["Save & Close", "Discard & Close", "Cancel"],
-			defaultId: 0,
-			cancelId: 2,
-			title: "Unsaved Changes",
-			message: "You have unsaved changes.",
-			detail: "Do you want to save your project before closing?",
-		});
-
-		if (choice === 0) {
-			editorWindow.webContents.send("request-save-before-close");
-			ipcMain.once("save-before-close-done", (_event, saved: boolean) => {
-				if (!saved) {
-					isAppQuitting = false;
-					return;
-				}
-
-				if (process.platform === "win32" && !isAppQuitting) {
-					closeEditorWindowToHud(editorWindow);
-				} else {
-					closeEditorWindowBypassingUnsavedPrompt(editorWindow);
-				}
-			});
-		} else if (choice === 1) {
-			if (process.platform === "win32" && !isAppQuitting) {
-				closeEditorWindowToHud(editorWindow);
-			} else {
-				closeEditorWindowBypassingUnsavedPrompt(editorWindow);
-			}
-		} else {
-			isAppQuitting = false;
+		if (!editorWindow.isDestroyed() && !editorWindow.webContents.isDestroyed()) {
+			editorWindow.webContents.send("request-close-with-unsaved-changes");
 		}
 	});
 

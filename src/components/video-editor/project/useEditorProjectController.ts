@@ -1,5 +1,5 @@
 import type { Dispatch, MutableRefObject, RefObject, SetStateAction } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { useI18n } from "@/contexts/I18nContext";
 import type { AspectRatio } from "@/utils/aspectRatioUtils";
 import { useAutoCaptionController } from "../captions/useAutoCaptionController";
@@ -215,6 +215,25 @@ export function useEditorProjectController(input: Input) {
 		handleSaveProject: saveActions.handleSaveProject,
 		handleSaveProjectAs: saveActions.handleSaveProjectAs,
 	});
+
+	useEffect(() => {
+		if (!window.electronAPI?.onRequestCloseWithUnsavedChanges) return;
+		return window.electronAPI.onRequestCloseWithUnsavedChanges(async () => {
+			const decision = await lifecycle.openUnsavedChangesDialog("close the editor");
+			if (decision === "discard") {
+				window.electronAPI.confirmCloseEditor?.("discard");
+			} else if (decision === "save") {
+				const saved = await saveActions.saveProject(false);
+				if (saved) {
+					window.electronAPI.confirmCloseEditor?.("save");
+				} else {
+					window.electronAPI.confirmCloseEditor?.("cancel");
+				}
+			} else {
+				window.electronAPI.confirmCloseEditor?.("cancel");
+			}
+		});
+	}, [lifecycle.openUnsavedChangesDialog, saveActions.saveProject]);
 
 	return {
 		snapshot,

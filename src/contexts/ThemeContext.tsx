@@ -59,6 +59,13 @@ function applyThemeToDOM(theme: ResolvedTheme) {
 	} else {
 		root.classList.remove("dark");
 	}
+	if (window.electronAPI?.setTitleBarOverlay) {
+		void window.electronAPI.setTitleBarOverlay({
+			color: "#00000000",
+			symbolColor: theme === "dark" ? "#ffffff" : "#111111",
+			height: 44,
+		});
+	}
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

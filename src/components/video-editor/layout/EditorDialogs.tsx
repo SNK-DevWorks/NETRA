@@ -134,38 +134,49 @@ export function EditorDialogs({
 					else resolveUnsavedChangesDialog("cancel");
 				}}
 			>
-				<DialogContent className="max-w-sm border-foreground/10 bg-editor-dialog text-foreground">
-					<DialogHeader>
-						<DialogTitle>
-							{t("editor.project.unsavedChangesTitle", "Unsaved changes")}
-						</DialogTitle>
-						<DialogDescription className="text-muted-foreground">
-							{t(
-								"editor.project.unsavedChangesDescription",
-								"Save your current project before you {{action}}?",
-								{ action: unsavedChangesDialogActionLabel },
-							)}
-						</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<Button
-							type="button"
-							variant="ghost"
-							onClick={() => resolveUnsavedChangesDialog("cancel")}
-						>
-							{t("common.actions.cancel", "Cancel")}
-						</Button>
-						<Button
-							type="button"
-							variant="ghost"
-							onClick={() => resolveUnsavedChangesDialog("discard")}
-						>
-							{t("editor.project.discardChanges", "Discard changes")}
-						</Button>
-						<Button type="button" onClick={() => resolveUnsavedChangesDialog("save")}>
-							{t("editor.project.saveProject", "Save project")}
-						</Button>
-					</DialogFooter>
+				<DialogContent className="max-w-[270px] border-none bg-transparent p-0 shadow-none overflow-visible [&>button:last-child]:hidden">
+					<div className="flex w-full flex-col select-none">
+						{/* Top Apple Confirmation Card */}
+						<div className="overflow-hidden rounded-[14px] border border-black/[0.08] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.38)] dark:border-black/[0.08] dark:bg-white">
+							<div className="px-4 py-3.5 text-center">
+								<DialogTitle className="text-[13px] font-semibold text-[#8e8e93] tracking-normal leading-tight dark:text-[#8e8e93]">
+									{unsavedChangesDialogActionLabel === "close the editor" || !unsavedChangesDialogActionLabel
+										? t("editor.project.unsavedChangesHeading", "Save changes before closing?")
+										: t("editor.project.unsavedChangesHeading", "Save changes?")}
+								</DialogTitle>
+								<DialogDescription className="sr-only">
+									{t("editor.project.unsavedChangesTitle", "Unsaved changes")}
+								</DialogDescription>
+							</div>
+							<div className="h-[0.5px] bg-[#3c3c43]/[0.18] dark:bg-[#3c3c43]/[0.18]" />
+							<button
+								type="button"
+								onClick={() => resolveUnsavedChangesDialog("save")}
+								className="flex h-11 w-full items-center justify-center text-[17px] font-normal text-[#007AFF] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] focus:outline-none"
+							>
+								{t("editor.project.save", "Save")}
+							</button>
+							<div className="h-[0.5px] bg-[#3c3c43]/[0.18] dark:bg-[#3c3c43]/[0.18]" />
+							<button
+								type="button"
+								onClick={() => resolveUnsavedChangesDialog("discard")}
+								className="flex h-11 w-full items-center justify-center text-[17px] font-normal text-[#FF3B30] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] focus:outline-none"
+							>
+								{t("editor.project.dontSave", "Don't Save")}
+							</button>
+						</div>
+
+						{/* Separate Bottom Cancel Card */}
+						<div className="mt-2 overflow-hidden rounded-[14px] border border-black/[0.08] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.38)] dark:border-black/[0.08] dark:bg-white">
+							<button
+								type="button"
+								onClick={() => resolveUnsavedChangesDialog("cancel")}
+								className="flex h-11 w-full items-center justify-center text-[17px] font-semibold text-[#007AFF] transition-colors hover:bg-black/[0.04] active:bg-black/[0.08] focus:outline-none"
+							>
+								{t("common.actions.cancel", "Cancel")}
+							</button>
+						</div>
+					</div>
 				</DialogContent>
 			</Dialog>
 

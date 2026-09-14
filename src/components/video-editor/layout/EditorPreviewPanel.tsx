@@ -216,7 +216,7 @@ export function EditorPreviewPanel(props: Props) {
 				</div>
 			</div>
 
-			<div className="relative flex flex-shrink-0 items-center px-1 py-1">
+			<div className="relative flex h-9 flex-shrink-0 items-center px-1">
 				<div className="z-10 flex min-w-0 flex-1 items-center gap-1.5">
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>

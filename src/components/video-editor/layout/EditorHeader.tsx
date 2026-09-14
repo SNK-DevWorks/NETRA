@@ -19,6 +19,7 @@ import { EditorPresetMenu } from "./EditorPresetMenu";
 type Props = {
 	t: ReturnType<typeof useI18n>["t"];
 	headerLeftControlsPaddingClass: string;
+	headerRightControlsPaddingClass: string;
 	project: ReturnType<typeof useProjectState>;
 	projectBrowserTriggerRef: RefObject<HTMLButtonElement>;
 	projectNameInputRef: RefObject<HTMLInputElement>;
@@ -53,6 +54,7 @@ export function EditorHeader(props: Props) {
 	const {
 		t,
 		headerLeftControlsPaddingClass,
+		headerRightControlsPaddingClass,
 		project,
 		projectBrowserTriggerRef,
 		projectNameInputRef,
@@ -92,7 +94,7 @@ export function EditorHeader(props: Props) {
 
 	return (
 		<div
-			className="relative z-50 flex h-11 flex-shrink-0 items-center justify-between border-b border-foreground/10 bg-editor-header/88 pl-6 pr-5 backdrop-blur-md"
+			className={`relative z-50 flex h-11 flex-shrink-0 items-center justify-between border-b border-foreground/10 bg-editor-header/88 pl-6 backdrop-blur-md ${headerRightControlsPaddingClass || "pr-5"}`}
 			style={{ WebkitAppRegion: "drag" } as CSSProperties}
 		>
 			<div
