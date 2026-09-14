@@ -23,6 +23,11 @@
 	user-select: none;
 }
 
+:global(.dark) .bar,
+:global([data-theme="dark"]) .bar {
+	background: var(--launch-bar-bg, #000000);
+}
+
 .barStateViewport {
 	position: relative;
 	display: flex;
@@ -382,17 +387,23 @@
 	width: 38px;
 	height: 38px;
 	border-radius: 9999px;
-	border: 1px solid rgba(255, 255, 255, 0.4);
-	background: radial-gradient(
-		circle at center,
-		#0a0e22 0%,
-		#0d142d 38%,
-		#210e20 40%,
-		#38112e 68%,
-		#6a1945 82%,
-		#a81e50 93%,
-		#e5e3ed 98%,
-		#c8c4d8 100%
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+	border: 1px solid var(--launch-rec-btn-border, rgba(255, 255, 255, 0.4));
+	background: var(
+		--launch-rec-btn-bg,
+		radial-gradient(
+			circle at center,
+			#0a0e22 0%,
+			#0d142d 38%,
+			#210e20 40%,
+			#38112e 68%,
+			#6a1945 82%,
+			#a81e50 93%,
+			#e5e3ed 98%,
+			#c8c4d8 100%
+		)
 	);
 	color: #ffffff;
 	cursor: pointer;
@@ -401,14 +412,20 @@
 	justify-content: center;
 	transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 	flex-shrink: 0;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+	box-shadow: var(
+		--launch-rec-btn-shadow,
+		0 1px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6)
+	);
 	outline: none;
 }
 
 .recBtn:hover {
 	transform: scale(1.03);
-	border-color: rgba(255, 255, 255, 0.65);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+	border-color: var(--launch-rec-btn-border-hover, rgba(255, 255, 255, 0.65));
+	box-shadow: var(
+		--launch-rec-btn-shadow-hover,
+		0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.75)
+	);
 }
 
 .recBtn:active {
@@ -429,21 +446,75 @@
 }
 
 .recDot {
-	width: 11px;
-	height: 11px;
+	width: var(--launch-rec-dot-size, 11px);
+	height: var(--launch-rec-dot-size, 11px);
 	border-radius: 9999px;
-	background: radial-gradient(circle at 40% 35%, #ff4a72 0%, #fc0b3f 65%, #c8002a 100%);
-	box-shadow: 0 0 4px rgba(252, 11, 63, 0.5);
+	background: var(
+		--launch-rec-dot-bg,
+		radial-gradient(circle at 40% 35%, #ff4a72 0%, #fc0b3f 65%, #c8002a 100%)
+	);
+	box-shadow: var(--launch-rec-dot-shadow, 0 0 4px rgba(252, 11, 63, 0.5));
+	border: var(--launch-rec-dot-border, none);
 	transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .stopSquare {
-	width: 11px;
-	height: 11px;
+	width: var(--launch-rec-stop-size, 11px);
+	height: var(--launch-rec-stop-size, 11px);
 	border-radius: 2.5px;
-	background: #ffffff;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	background: var(--launch-rec-stop-bg, #ffffff);
+	box-shadow: var(--launch-rec-stop-shadow, 0 1px 2px rgba(0, 0, 0, 0.3));
+	border: var(--launch-rec-stop-border, none);
 	transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Styling for dark mode: big red in center, slim red border, perfectly even transparent gap */
+:global(.dark) .recBtn,
+:global([data-theme="dark"]) .recBtn {
+	border: 1.5px solid var(--launch-rec-btn-border, #f43f5e);
+	background: var(--launch-rec-btn-bg, transparent);
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+	box-shadow: var(
+		--launch-rec-btn-shadow,
+		0 0 10px rgba(244, 63, 94, 0.25)
+	);
+}
+
+:global(.dark) .recBtn:hover,
+:global([data-theme="dark"]) .recBtn:hover {
+	border-color: var(--launch-rec-btn-border-hover, #ff5277);
+	background: transparent;
+	box-shadow: var(
+		--launch-rec-btn-shadow-hover,
+		0 0 16px rgba(244, 63, 94, 0.45)
+	);
+}
+
+:global(.dark) .recDot,
+:global([data-theme="dark"]) .recDot {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	width: var(--launch-rec-dot-size, 28px);
+	height: var(--launch-rec-dot-size, 28px);
+	background: var(--launch-rec-dot-bg, #f43f5e);
+	box-shadow: var(--launch-rec-dot-shadow, none);
+	border: var(--launch-rec-dot-border, none);
+}
+
+:global(.dark) .stopSquare,
+:global([data-theme="dark"]) .stopSquare {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	width: var(--launch-rec-stop-size, 18px);
+	height: var(--launch-rec-stop-size, 18px);
+	border-radius: 4px;
+	background: var(--launch-rec-stop-bg, #f43f5e);
+	box-shadow: var(--launch-rec-stop-shadow, none);
+	border: var(--launch-rec-stop-border, none);
 }
 
 .recDotBlink {

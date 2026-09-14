@@ -30,6 +30,33 @@
 	--launch-pill-active-border: rgba(37, 99, 235, 0.25);
 	--launch-pill-active-hover: rgba(37, 99, 235, 0.16);
 
+	/* HUD Record Button (Light Mode: dark obsidian aperture well, glowing ruby red dot) */
+	--launch-rec-btn-bg: radial-gradient(
+		circle at center,
+		#0a0e22 0%,
+		#0d142d 38%,
+		#210e20 40%,
+		#38112e 68%,
+		#6a1945 82%,
+		#a81e50 93%,
+		#e5e3ed 98%,
+		#c8c4d8 100%
+	);
+	--launch-rec-btn-border: rgba(255, 255, 255, 0.4);
+	--launch-rec-btn-border-hover: rgba(255, 255, 255, 0.65);
+	--launch-rec-btn-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+	--launch-rec-btn-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+
+	--launch-rec-dot-size: 11px;
+	--launch-rec-dot-bg: radial-gradient(circle at 40% 35%, #ff4a72 0%, #fc0b3f 65%, #c8002a 100%);
+	--launch-rec-dot-shadow: 0 0 4px rgba(252, 11, 63, 0.5);
+	--launch-rec-dot-border: none;
+
+	--launch-rec-stop-size: 11px;
+	--launch-rec-stop-bg: #ffffff;
+	--launch-rec-stop-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	--launch-rec-stop-border: none;
+
 	color: var(--launch-text);
 }
 
@@ -48,10 +75,10 @@
 	--launch-accent: #3b82f6;
 	--launch-accent-soft: #1e293b;
 
-	/* Apple Pill Bar (Solid deep slate navy, no glassmorphism) */
-	--launch-bar-bg: #151a24;
-	--launch-bar-border: rgba(255, 255, 255, 0.08);
-	--launch-bar-shadow: 0 16px 44px rgba(0, 0, 0, 0.48), 0 4px 14px rgba(0, 0, 0, 0.24);
+	/* Apple Pill Bar (Solid pure black, not bluish, no glassmorphism) */
+	--launch-bar-bg: #000000;
+	--launch-bar-border: rgba(255, 255, 255, 0.1);
+	--launch-bar-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 4px 16px rgba(0, 0, 0, 0.4);
 
 	/* Separate Rounded Pills & Circular Buttons */
 	--launch-pill-bg: #222938;
@@ -63,4 +90,21 @@
 	--launch-pill-active-bg: rgba(59, 130, 246, 0.18);
 	--launch-pill-active-border: rgba(59, 130, 246, 0.35);
 	--launch-pill-active-hover: rgba(59, 130, 246, 0.26);
+
+	/* HUD Record Button (Dark Mode: big red in center, slim red border, perfectly even transparent gap) */
+	--launch-rec-btn-bg: transparent;
+	--launch-rec-btn-border: #f43f5e;
+	--launch-rec-btn-border-hover: #ff5277;
+	--launch-rec-btn-shadow: 0 0 10px rgba(244, 63, 94, 0.25);
+	--launch-rec-btn-shadow-hover: 0 0 16px rgba(244, 63, 94, 0.45);
+
+	--launch-rec-dot-size: 28px;
+	--launch-rec-dot-bg: #f43f5e;
+	--launch-rec-dot-shadow: none;
+	--launch-rec-dot-border: none;
+
+	--launch-rec-stop-size: 18px;
+	--launch-rec-stop-bg: #f43f5e;
+	--launch-rec-stop-shadow: none;
+	--launch-rec-stop-border: none;
 }

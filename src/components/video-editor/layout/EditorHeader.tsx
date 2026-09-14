@@ -12,7 +12,7 @@ import type { useExportSettings } from "../export/useExportSettings";
 import type { useExportStatusViewModel } from "../export/useExportStatusViewModel";
 import type { useVideoEditorPresets } from "../presets/useVideoEditorPresets";
 import type { useProjectState } from "../state/useProjectState";
-import { APP_HEADER_ICON_BUTTON_CLASS, DiscordLinkButton, FeedbackDialog } from "../TutorialHelp";
+
 import { EditorExportMenu } from "./EditorExportMenu";
 import { EditorPresetMenu } from "./EditorPresetMenu";
 
@@ -92,28 +92,24 @@ export function EditorHeader(props: Props) {
 
 	return (
 		<div
-			className="relative z-50 flex h-11 flex-shrink-0 items-center justify-between border-b border-foreground/10 bg-editor-header/88 px-5 backdrop-blur-md"
+			className="relative z-50 flex h-11 flex-shrink-0 items-center justify-between border-b border-foreground/10 bg-editor-header/88 pl-6 pr-5 backdrop-blur-md"
 			style={{ WebkitAppRegion: "drag" } as CSSProperties}
 		>
 			<div
 				className={`flex items-center justify-self-start gap-1.5 ${headerLeftControlsPaddingClass}`}
 				style={{ WebkitAppRegion: "no-drag" } as CSSProperties}
 			>
-				<Button
+				<button
 					ref={projectBrowserTriggerRef}
 					type="button"
-					variant="ghost"
-					size="sm"
 					onClick={handleOpenProjectBrowser}
-					className={APP_HEADER_ICON_BUTTON_CLASS}
+					className="group relative flex h-9 w-9 items-center justify-center rounded-lg p-0 text-muted-foreground outline-none transition-colors hover:bg-foreground/10 hover:text-foreground focus:outline-none"
 					title={t("editor.project.projects", "Open projects")}
 					aria-label={t("editor.project.projects", "Open projects")}
 				>
-					<FolderOpen className="h-4 w-4" />
-				</Button>
-				<DiscordLinkButton />
-				<FeedbackDialog />
-				<div className="ml-1 h-5 w-px bg-foreground/10" />
+					<FolderOpen className="h-[27px] w-[27px]" />
+				</button>
+				<div className="mx-1 h-5 w-px bg-foreground/10" />
 				<Button
 					type="button"
 					variant="ghost"
